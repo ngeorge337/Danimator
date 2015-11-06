@@ -1,0 +1,343 @@
+#include "libs.h"
+#include "animator.h"
+#include "SFMLControl.h"
+#include "mainFrame.h"
+
+#define USE_RENDERTEXTURE 1
+
+CVAR(Bool, r_bilinear, true, false, true, "Use bilinear filtering mode in the render view", CVAR_ARCHIVE);
+
+extern DanFrame *theFrame;
+
+sf::Clock engineClock;
+
+double t = 0.0;
+const double dt = 0.01;
+double frameTime = 0.0;
+bool runOnce = false;
+
+double currentTime;
+int tickTime;
+double accumulator = 0.0;
+float interpolation = 0.f;
+
+bool recreate = true;
+
+bool lastFilterSetting = false;
+
+bool capturemode = false;
+bool allowCapture = false;
+bool isCapturing = false;
+static sf::Vector2i lastPos;
+sf::RectangleShape hudRect;
+sf::RectangleShape crosshairRects[4];
+sf::RectangleShape outlineRect;
+
+BEGIN_EVENT_TABLE(wxSFMLCanvas, wxControl)
+EVT_IDLE(wxSFMLCanvas::OnIdle)
+EVT_PAINT(wxSFMLCanvas::OnPaint)
+EVT_ERASE_BACKGROUND(wxSFMLCanvas::OnEraseBackground)
+EVT_SIZE(wxSFMLCanvas::OnResize)
+EVT_LEFT_DOWN(wxSFMLCanvas::OnLeftMouseDown)
+EVT_LEFT_UP(wxSFMLCanvas::OnLeftMouseUp)
+EVT_MOUSEWHEEL(wxSFMLCanvas::OnScrollWheel)
+EVT_LEAVE_WINDOW(wxSFMLCanvas::OnLeaveWindow)
+END_EVENT_TABLE()
+
+void wxSFMLCanvas::OnIdle(wxIdleEvent&)
+{
+	// Send a paint message when the control is idle, to ensure maximum framerate
+	/*
+	sf::Event ev;
+	while(this->pollEvent(ev))
+	{
+	}
+	*/
+	Refresh();
+}
+
+void wxSFMLCanvas::OnEraseBackground(wxEraseEvent&)
+{
+}
+
+void wxSFMLCanvas::OnPaint(wxPaintEvent&)
+{
+	// Prepare the control to be repainted
+	wxPaintDC Dc(this);
+
+	setActive(true);
+
+	// Let the derived class do its specific stuff
+	OnUpdate();
+
+	// Display on screen
+	display();
+}
+
+wxSFMLCanvas::wxSFMLCanvas(wxWindow* Parent, wxWindowID Id, const wxPoint& Position, const wxSize& Size, long Style) :
+wxControl(Parent, Id, Position, Size, Style)
+{
+#ifdef __WXGTK__
+
+	// GTK implementation requires to go deeper to find the
+	// low-level X11 identifier of the widget
+	gtk_widget_realize(m_wxwindow);
+	gtk_widget_set_double_buffered(m_wxwindow, false);
+	GdkWindow* Win = gtk_widget_get_window((GtkWidget *)GetHandle());
+	XFlush(GDK_WINDOW_XDISPLAY(Win));
+	sf::RenderWindow::create(GDK_WINDOW_XWINDOW(Win));
+
+#else
+
+	m_zoom = 1.f;
+	m_zoomlevel = 100;
+
+	// Tested under Windows XP only (should work with X11
+	// and other Windows versions - no idea about MacOS)
+	sf::ContextSettings settings;
+	settings.depthBits = 32;
+	settings.stencilBits = 8;
+	sf::RenderWindow::create(GetHandle(), settings);
+
+#if USE_RENDERTEXTURE
+	rt = new sf::RenderTexture();
+	rt->create(640, 480, true);
+	rt->setSmooth(false);
+#endif
+
+#endif
+}
+
+void wxSFMLCanvas::OnUpdate()
+{
+	/*
+	Camera::GetCamera().setSize(
+		sf::Vector2f(theFrame->glCanvas->GetSize().x % 2 == 0 ? theFrame->glCanvas->GetSize().x : theFrame->glCanvas->GetSize().x - 1,
+		theFrame->glCanvas->GetSize().y % 2 == 0 ? theFrame->glCanvas->GetSize().y : theFrame->glCanvas->GetSize().y - 1));
+		*/
+	Camera::GetCamera().setSize(sf::Vector2f(theFrame->glCanvas->GetSize().x, theFrame->glCanvas->GetSize().y));
+
+#if USE_RENDERTEXTURE
+	if(recreate)
+	{
+		recreate = false;
+		rt->create(Camera::GetCamera().getSize().x, Camera::GetCamera().getSize().y, true);
+		//rt->create(320, 200, false);
+		//sf::Vector2f sz((int)Camera::GetCamera().getSize().x % 2 == 0 ? Camera::GetCamera().getSize().x : Camera::GetCamera().getSize().x - 1,
+		//				(int)Camera::GetCamera().getSize().y % 2 == 0 ? Camera::GetCamera().getSize().y : Camera::GetCamera().getSize().y - 1);
+		//rt->create(sz.x, sz.y, true);
+	}
+	rt->setSmooth(false);
+#endif
+	if(!runOnce)
+	{
+		runOnce = true;
+		currentTime = engineClock.getElapsedTime().asSeconds();
+		tickTime = currentTime;
+
+		hudRect = sf::RectangleShape(sf::Vector2f(320, 200));
+		hudRect.setFillColor(sf::Color::Cyan);
+
+		for(int i = 0; i < 4; i++)
+		{
+			crosshairRects[i].setFillColor(sf::Color::Red);
+		}
+
+		const float GAP = 14.f;
+
+		// Top
+		crosshairRects[0].setSize(sf::Vector2f(4, 12));
+		crosshairRects[0].setOrigin(crosshairRects[0].getSize().x * 0.5f, crosshairRects[0].getSize().y * 0.5f);
+		crosshairRects[0].setPosition(sf::Vector2f(Round(160.f), Round(100.f - GAP)));
+
+		// Right
+		crosshairRects[1].setSize(sf::Vector2f(12, 4));
+		crosshairRects[1].setOrigin(crosshairRects[1].getSize().x * 0.5f, crosshairRects[1].getSize().y * 0.5f);
+		crosshairRects[1].setPosition(sf::Vector2f(Round(160.f + GAP), Round(100.f)));
+
+		// Left
+		crosshairRects[2].setSize(sf::Vector2f(12, 4));
+		crosshairRects[2].setOrigin(crosshairRects[2].getSize().x * 0.5f, crosshairRects[2].getSize().y * 0.5f);
+		crosshairRects[2].setPosition(sf::Vector2f(Round(160.f - GAP), Round(100.f)));
+
+		// Bottom
+		crosshairRects[3].setSize(sf::Vector2f(4, 12));
+		crosshairRects[3].setOrigin(crosshairRects[3].getSize().x * 0.5f, crosshairRects[3].getSize().y * 0.5f);
+		crosshairRects[3].setPosition(sf::Vector2f(Round(160.f), Round(100.f + GAP)));
+	}
+
+	Camera::GetCamera().setCenter(sf::Vector2f(160, 100));
+	Camera::GetCamera().setViewport(sf::FloatRect(0, 0, 1, 1));
+	Camera::GetCamera().zoom(m_zoom);
+	sf::Listener::setPosition(Camera::GetCamera().getCenter().x, 0, Camera::GetCamera().getCenter().y);
+
+	double newTime = engineClock.getElapsedTime().asSeconds();
+	frameTime = newTime - currentTime;
+	if(frameTime > 0.25)
+		frameTime = 0.25;
+	currentTime = newTime;
+	accumulator += frameTime;
+
+	while(accumulator >= dt)
+	{
+		if(theFrame->playingMode) theFrame->GetAnimator().Tick(dt);
+		accumulator -= dt;
+		t += dt;
+	}
+
+	if(theFrame->playingMode) theFrame->timelineSlider->SetValue(theFrame->GetAnimator().GetCurrentState()->frameOffset + 1);
+
+	this->setView(Camera::GetCamera());
+	clear(sf::Color::Black);
+
+#if USE_RENDERTEXTURE
+	rt->setActive();
+	rt->setView(Camera::GetCamera());
+	rt->clear(sf::Color::Black);
+#endif
+		
+	sf::Vector2f pos;// = mapPixelToCoords(sf::Mouse::getPosition());
+	wxPoint p = ScreenToClient(wxPoint(sf::Mouse::getPosition().x, sf::Mouse::getPosition().y));
+	pos.x = p.x;
+	pos.y = p.y;
+	pos.x = Round(pos.x);
+	pos.y = Round(pos.y);
+#if USE_RENDERTEXTURE
+	pos = rt->mapPixelToCoords(sf::Vector2i(pos));
+#else
+	pos = mapPixelToCoords(sf::Vector2i(pos));
+#endif
+
+#if USE_RENDERTEXTURE
+	rt->draw(hudRect);
+#else
+	this->draw(hudRect);
+#endif
+
+	if(theFrame->GetAnimator().GetCurrentState() != nullptr)
+	{
+		if(isCapturing || theFrame->GetAnimator().GetCurrentState()->GetCurrentFrame().sprite.getGlobalBounds().contains(pos))
+		{
+			// draw outlining rect
+			outlineRect = sf::RectangleShape(sf::Vector2f(theFrame->GetAnimator().GetCurrentState()->GetCurrentFrame().sprite.getTexture()->getSize()));
+			outlineRect.setFillColor(sf::Color::Transparent);
+			outlineRect.setSize(sf::Vector2f(outlineRect.getSize().x - 2, outlineRect.getSize().y - 2));
+			outlineRect.setPosition(sf::Vector2f(theFrame->GetAnimator().GetCurrentState()->GetCurrentFrame().sprite.getPosition().x + 1, theFrame->GetAnimator().GetCurrentState()->GetCurrentFrame().sprite.getPosition().y + 1));
+			outlineRect.setOutlineColor(sf::Color::Red);
+			outlineRect.setOutlineThickness(1.f);
+			allowCapture = true;
+
+#if USE_RENDERTEXTURE
+			rt->draw(outlineRect);
+#else
+			this->draw(outlineRect);
+#endif
+		}
+		else
+			allowCapture = false;
+	}
+
+	if(allowCapture && capturemode && sf::Mouse::isButtonPressed(sf::Mouse::Button::Left))
+	{
+		if(theFrame->GetAnimator().GetCurrentState() != nullptr)
+		{
+			isCapturing = true;
+			sf::Vector2i diff = sf::Vector2i(pos) - lastPos;
+			lastPos = sf::Vector2i(pos);
+			theFrame->GetAnimator().GetCurrentState()->GetCurrentFrame().sprite.move(sf::Vector2f(diff));
+			theFrame->xSpin->SetValue(int(theFrame->GetAnimator().GetCurrentState()->GetCurrentFrame().sprite.getPosition().x));
+			theFrame->ySpin->SetValue(int(theFrame->GetAnimator().GetCurrentState()->GetCurrentFrame().sprite.getPosition().y));
+			theFrame->saved = false;
+		}
+	}
+
+	if(theFrame->crosshairCheckBox->GetValue())
+	{
+		for(int i = 0; i < 4; i++)
+		{
+#if USE_RENDERTEXTURE
+			rt->draw(crosshairRects[i]);
+#else
+			this->draw(crosshairRects[i]);
+#endif
+		}
+	}
+
+#if USE_RENDERTEXTURE
+	rt->draw(theFrame->GetAnimator());
+	rt->display();
+
+	this->setActive();
+	renderSprite.setTexture(rt->getTexture(), true);
+	renderSprite.setScale(Camera::GetCamera().getSize().x / renderSprite.getLocalBounds().width, Camera::GetCamera().getSize().y / renderSprite.getLocalBounds().height);
+	renderSprite.setOrigin(renderSprite.getLocalBounds().width / 2, renderSprite.getLocalBounds().height / 2);
+	renderSprite.setPosition(Camera::GetCamera().getCenter());
+	this->draw(renderSprite);
+#else
+	this->draw(theFrame->GetAnimator());
+#endif
+}
+
+void wxSFMLCanvas::OnResize(wxSizeEvent& event)
+{
+#ifdef __WXGTK__
+	// If I recreate here GTK gives an assertion failure.
+	recreate_flag = true;
+#endif
+#if USE_RENDERTEXTURE
+	recreate = true;
+#endif
+	sf::Event ev;
+	while(this->pollEvent(ev))
+	{
+	}
+}
+
+void wxSFMLCanvas::OnLeftMouseDown(wxMouseEvent& event)
+{
+	event.Skip();
+	sf::Vector2f pos;// = mapPixelToCoords(sf::Mouse::getPosition());
+	wxPoint p = ScreenToClient(wxPoint(sf::Mouse::getPosition().x, sf::Mouse::getPosition().y));
+	pos.x = p.x;
+	pos.y = p.y;
+	pos.x = Round(pos.x);
+	pos.y = Round(pos.y);
+#if USE_RENDERTEXTURE
+	pos = rt->mapPixelToCoords(sf::Vector2i(pos));
+#else
+	pos = mapPixelToCoords(sf::Vector2i(pos));
+#endif
+	lastPos = sf::Vector2i(pos);
+	capturemode = true;
+}
+
+void wxSFMLCanvas::OnLeftMouseUp(wxMouseEvent& event)
+{
+	event.Skip();
+	isCapturing = false;
+	capturemode = false;
+}
+
+void wxSFMLCanvas::OnScrollWheel(wxMouseEvent& event)
+{
+	int delta = event.GetWheelRotation();
+	if(delta < 0)
+	{
+		m_zoom += 0.05f;
+		m_zoomlevel += 5;
+	}
+	else if(delta > 0)
+	{
+		m_zoom -= 0.05f;
+		m_zoomlevel -= 5;
+	}
+	ClampTo(m_zoom, 0.1f, 2.5f);
+	ClampTo(m_zoomlevel, 10, 250);
+}
+
+void wxSFMLCanvas::OnLeaveWindow(wxMouseEvent& event)
+{
+	event.Skip();
+	isCapturing = false;
+	capturemode = false;
+}

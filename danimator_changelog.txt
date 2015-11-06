@@ -1,0 +1,16 @@
+====================
+Beta 2 Changelog
+====================
+-Fixed opening Project didn't set timeline max value of state correctly
+-Fixed rendering artifacts in the sprite view
+-Fixed play/stop animation tooltip showing "play animation" when it should read "stop animation"
+-Fixed being able to use the editor controls after deleting a state, causing possible crashes
+-Fixed bug where an embedding option was not saving to config file
+-Fixed some text alignments
+-Project name now shows up in the titlebar when saved or loaded
+-Slight change to DECORATE code formatting (one less tab indent)
+-Reduced size of Code window a bit to accomodate (less screen cluttering)
+-Lots of code refactoring for cleanliness (still not perfect though)
+-Added bilinear filtering option to the Settings menu
+-Removed the minimum 2-frame requirement; states can now be created empty (as a safeguard; if modifications are attempted on an empty state, an empty frame will be inserted before editing continues)
+-Added mouse scroll wheel zooming
