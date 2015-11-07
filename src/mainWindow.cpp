@@ -20,8 +20,8 @@ bool DanApp::OnInit()
 	CCMDMan->ReadCCMDs(*cfg);
 
 	// Make the initial frame (toplevel window)
-	theFrame = new DanFrame("Danimator", wxPoint(0, 0), wxSize(1096, 600));
-	theFrame->SetSize(wxSize(1096, 600));
+	theFrame = new DanFrame("Danimator", wxPoint(0, 0), wxSize(954, 660));
+	theFrame->SetSize(wxSize(954, 660));
 	//theFrame->SetMinSize(wxSize(1088, 600));
 
 	//rw.create(theFrame->glCanvas->GetHandle(), sf::ContextSettings(24, 8, 0, 2, 1));

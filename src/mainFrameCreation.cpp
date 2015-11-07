@@ -63,7 +63,7 @@ void DanFrame::BuildStatesList()
 	stateListSizer = new wxBoxSizer(wxVERTICAL);
 	stateButtonSizer = new wxBoxSizer(wxHORIZONTAL);
 
-	StateListCtrl = new wxListBox(DanPanel, ID_STATELIST, wxPoint(0, 0), wxSize(128, 224), NULL, NULL, wxLB_SINGLE | wxLB_NEEDED_SB | wxLB_SORT);
+	StateListCtrl = new wxListBox(DanPanel, ID_STATELIST, wxPoint(0, 0), wxSize(200, 120), NULL, NULL, wxLB_SINGLE | wxLB_NEEDED_SB | wxLB_SORT);
 	stateListSizer->Add(StateListCtrl, 1, wxALIGN_LEFT);
 
 	newStateButton = new wxButton(DanPanel, ID_NEWSTATE, _T("New State"), wxPoint(0, 0), wxSize(32, 32), wxBU_NOTEXT);
@@ -83,7 +83,7 @@ void DanFrame::BuildStatesList()
 	stateButtonSizer->Add(viewCodeButton);
 	stateButtonSizer->Add(exportCodeButton);
 
-	stateSizer->SetFlexibleDirection(wxVERTICAL);
+	stateSizer->SetFlexibleDirection(wxBOTH);
 	stateSizer->Add(stateListSizer, 1, wxEXPAND | wxLEFT | wxTOP | wxBOTTOM, 4);
 	stateSizer->Add(stateButtonSizer, 0, wxALIGN_CENTER_HORIZONTAL | wxBOTTOM | wxLEFT | wxRIGHT, 4);
 	stateSizer->AddGrowableRow(0, 1);
@@ -117,7 +117,7 @@ void DanFrame::BuildResourceLists()
 
 	//spritePageSizer->SetFlexibleDirection(wxVERTICAL);
 	spritePageSizer->Add(spriteListSizer, 1, wxEXPAND | wxALL, 4);
-	spritePageSizer->Add(spriteButtonSizer, 0, wxALIGN_CENTER_HORIZONTAL | wxBOTTOM | wxRIGHT, 4);
+	spritePageSizer->Add(spriteButtonSizer, 1, wxALIGN_CENTER_HORIZONTAL | wxBOTTOM | wxRIGHT, 4);
 	spritePageSizer->AddGrowableRow(0, 1);
 
 	spritePanel->SetSizer(spritePageSizer);
@@ -146,7 +146,7 @@ void DanFrame::BuildResourceLists()
 
 	//soundPageSizer->SetFlexibleDirection(wxVERTICAL);
 	soundPageSizer->Add(soundListSizer, 1, wxEXPAND | wxALL, 4);
-	soundPageSizer->Add(soundButtonSizer, 0, wxALIGN_CENTER_HORIZONTAL | wxBOTTOM | wxRIGHT, 4);
+	soundPageSizer->Add(soundButtonSizer, 1, wxALIGN_CENTER_HORIZONTAL | wxBOTTOM | wxRIGHT, 4);
 	soundPageSizer->AddGrowableRow(0, 1);
 
 	soundPanel->SetSizer(soundPageSizer);

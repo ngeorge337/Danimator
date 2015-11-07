@@ -13,17 +13,21 @@ DanFrame::DanFrame(const wxString& title, const wxPoint& pos, const wxSize& size
 
 	// Add the panel so we can "mount" controls to it
 	DanPanel = new wxPanel(this);
-	DanSizer = new wxFlexGridSizer(0, 3, 0, 2);
+	DanSizer = new wxFlexGridSizer(0, 2, 0, 2);
+	wxBoxSizer *tempSizer = new wxBoxSizer(wxVERTICAL);
 
 	BuildStatesList();
 	BuildResourceLists();
 	BuildCanvasControls();
 	
 	// Finalize Sizers
-	DanSizer->Add(stateSizer, 1, wxEXPAND);
-	DanSizer->Add(ResourcesNotebook, 1, wxEXPAND);
+	tempSizer->Add(ResourcesNotebook, 1, wxEXPAND);
+	tempSizer->Add(stateSizer, 1, wxEXPAND);
+	DanSizer->Add(tempSizer, 1, wxEXPAND);
+	//DanSizer->Add(stateSizer, 1, wxEXPAND);
+	//DanSizer->Add(ResourcesNotebook, 1, wxEXPAND);
 	DanSizer->Add(renderSizer, 1, wxEXPAND);
-	DanSizer->AddGrowableCol(2, 1);
+	DanSizer->AddGrowableCol(1, 1);
 	DanSizer->AddGrowableRow(0, 1);
 	DanPanel->SetSizerAndFit(DanSizer);
 

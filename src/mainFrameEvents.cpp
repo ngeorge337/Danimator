@@ -268,7 +268,7 @@ void DanFrame::OnExit(wxCommandEvent& event)
 
 void DanFrame::OnAbout(wxCommandEvent& event)
 {
-	wxMessageBox("Danimator\n\"A friggin' Animation Program\"\n\nby Nick 'patience' George\n(A.K.A. Theshooter7)\n\nVersion " DANVERSION,
+	wxMessageBox("Danimator\nA friggin' ZDoom Animation Program\n\nby Nick 'patience' George\n(A.K.A. Theshooter7)\n\nIcon art by Wartorn\n\nVersion " DANVERSION,
 				 "About Danimator", wxOK | wxICON_INFORMATION);
 }
 
