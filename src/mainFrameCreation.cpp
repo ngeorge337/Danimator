@@ -309,9 +309,9 @@ void DanFrame::CreateTimelineButtons()
 void DanFrame::BuildStatusBar()
 {
 	// Create the status bar
-	DanStatus = CreateStatusBar(3);
-	int fieldsizes[3] = { -2, -1, 120 };
-	DanStatus->SetStatusWidths(3, fieldsizes);
+	DanStatus = new DanStatusBar(this, wxSTB_DEFAULT_STYLE);
+	this->SetStatusBar(DanStatus);
+
 	//SetStatusText("Welcome...to Danimator!");
-	SetStatusText("");
+	//SetStatusText("");
 }

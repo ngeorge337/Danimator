@@ -11,6 +11,9 @@ public:
 
 	int GetZoomLevel() const { return m_zoomlevel; }
 
+	static float m_zoom;
+	static int m_zoomlevel;
+
 private:
 
 	DECLARE_EVENT_TABLE()
@@ -18,8 +21,6 @@ private:
 	sf::RenderTexture *rt;
 	sf::Sprite renderSprite;
 
-	float m_zoom;
-	int m_zoomlevel;
 
 	virtual void OnUpdate();
 

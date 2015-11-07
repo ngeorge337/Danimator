@@ -38,6 +38,11 @@ EVT_BUTTON(ID_PLAYFROMSTART, DanFrame::OnPlayFromStart)
 EVT_CHOICE(ID_ENDING, DanFrame::OnFlowGoto)
 wxEND_EVENT_TABLE()
 
+wxBEGIN_EVENT_TABLE(DanStatusBar, wxStatusBar)
+EVT_SIZE(DanStatusBar::OnSize)
+EVT_SLIDER(ID_STATUS_ZOOM, DanStatusBar::OnZoomSliderChange)
+wxEND_EVENT_TABLE()
+
 void DanFrame::OnNewProject(wxCommandEvent& event)
 {
 	if(!saved)

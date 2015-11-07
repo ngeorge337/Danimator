@@ -756,3 +756,43 @@ void DanFrame::LoadProject(const wxString &fileName)
 			animator.GetState(stateLabel)->m_frames.back().soundName = "";
 	}
 }
+
+DanStatusBar::DanStatusBar(wxWindow *parent, long style) : wxStatusBar(parent, wxID_ANY, style, "DanStatusBar")
+{
+	SetFieldsCount(3);
+	int fieldsizes[3] = { -2, -1, 180 };
+	SetStatusWidths(3, fieldsizes);
+
+	zoomText = new wxStaticText(this, wxID_ANY, "Zoom: ", wxPoint(GetSize().GetWidth() - 198, 0), wxDefaultSize, 0);
+	zoomValue = new wxStaticText(this, wxID_ANY, "   %",  wxPoint(GetSize().GetWidth() - 160, 0), wxDefaultSize, wxALIGN_RIGHT);
+	zoomSlider = new wxSlider(this, ID_STATUS_ZOOM, 25, 2, 35, wxPoint(GetSize().GetWidth() - 130, 0), wxSize(120, 22), wxSL_HORIZONTAL);
+}
+
+void DanStatusBar::OnSize(wxSizeEvent& event)
+{
+	wxRect rect;
+	if(!GetFieldRect(2, rect))
+	{
+		event.Skip();
+		return;
+	}
+
+	zoomText->SetPosition(		wxPoint(GetSize().GetWidth() - 198, 4));
+	zoomValue->SetPosition(		wxPoint(GetSize().GetWidth() - 160, 4));
+	zoomSlider->SetPosition(	wxPoint(GetSize().GetWidth() - 130, 3));
+
+	//event.Skip();
+}
+
+void DanStatusBar::SetZoomValue(int val)
+{
+	zoomValue->SetLabel(wxString(std::to_string((val)) + "%"));
+	zoomSlider->SetValue(val / 5);
+}
+
+void DanStatusBar::OnZoomSliderChange(wxCommandEvent& event)
+{
+	wxSFMLCanvas::m_zoomlevel = 5 * zoomSlider->GetValue();
+	wxSFMLCanvas::m_zoom = 2.f - (float(wxSFMLCanvas::m_zoomlevel) * 0.01f);
+	zoomValue->SetLabel(wxString(std::to_string(wxSFMLCanvas::m_zoomlevel) + "%"));
+}

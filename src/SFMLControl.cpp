@@ -9,6 +9,9 @@ CVAR(Bool, r_bilinear, true, false, true, "Use bilinear filtering mode in the re
 
 extern DanFrame *theFrame;
 
+float wxSFMLCanvas::m_zoom = 1.f;
+int wxSFMLCanvas::m_zoomlevel = 100;
+
 sf::Clock engineClock;
 
 double t = 0.0;
@@ -88,10 +91,7 @@ wxControl(Parent, Id, Position, Size, Style)
 	sf::RenderWindow::create(GDK_WINDOW_XWINDOW(Win));
 
 #else
-
-	m_zoom = 1.f;
-	m_zoomlevel = 100;
-
+	
 	// Tested under Windows XP only (should work with X11
 	// and other Windows versions - no idea about MacOS)
 	sf::ContextSettings settings;
@@ -134,6 +134,9 @@ void wxSFMLCanvas::OnUpdate()
 		runOnce = true;
 		currentTime = engineClock.getElapsedTime().asSeconds();
 		tickTime = currentTime;
+
+		DanStatusBar *bar = static_cast<DanStatusBar *>(theFrame->GetStatusBar());
+		if(bar) bar->SetZoomValue(m_zoomlevel);
 
 		hudRect = sf::RectangleShape(sf::Vector2f(320, 200));
 		hudRect.setFillColor(sf::Color::Cyan);
@@ -216,22 +219,27 @@ void wxSFMLCanvas::OnUpdate()
 
 	if(theFrame->GetAnimator().GetCurrentState() != nullptr)
 	{
-		if(isCapturing || theFrame->GetAnimator().GetCurrentState()->GetCurrentFrame().sprite.getGlobalBounds().contains(pos))
+		if(this->GetScreenRect().Contains(wxGetMousePosition()))
 		{
-			// draw outlining rect
-			outlineRect = sf::RectangleShape(sf::Vector2f(theFrame->GetAnimator().GetCurrentState()->GetCurrentFrame().sprite.getTexture()->getSize()));
-			outlineRect.setFillColor(sf::Color::Transparent);
-			outlineRect.setSize(sf::Vector2f(outlineRect.getSize().x - 2, outlineRect.getSize().y - 2));
-			outlineRect.setPosition(sf::Vector2f(theFrame->GetAnimator().GetCurrentState()->GetCurrentFrame().sprite.getPosition().x + 1, theFrame->GetAnimator().GetCurrentState()->GetCurrentFrame().sprite.getPosition().y + 1));
-			outlineRect.setOutlineColor(sf::Color::Red);
-			outlineRect.setOutlineThickness(1.f);
-			allowCapture = true;
+			if(isCapturing || theFrame->GetAnimator().GetCurrentState()->GetCurrentFrame().sprite.getGlobalBounds().contains(pos))
+			{
+				// draw outlining rect
+				outlineRect = sf::RectangleShape(sf::Vector2f(theFrame->GetAnimator().GetCurrentState()->GetCurrentFrame().sprite.getTexture()->getSize()));
+				outlineRect.setFillColor(sf::Color::Transparent);
+				outlineRect.setSize(sf::Vector2f(outlineRect.getSize().x - 2, outlineRect.getSize().y - 2));
+				outlineRect.setPosition(sf::Vector2f(theFrame->GetAnimator().GetCurrentState()->GetCurrentFrame().sprite.getPosition().x + 1, theFrame->GetAnimator().GetCurrentState()->GetCurrentFrame().sprite.getPosition().y + 1));
+				outlineRect.setOutlineColor(sf::Color::Red);
+				outlineRect.setOutlineThickness(1.f);
+				allowCapture = true;
 
 #if USE_RENDERTEXTURE
-			rt->draw(outlineRect);
+				rt->draw(outlineRect);
 #else
-			this->draw(outlineRect);
+				this->draw(outlineRect);
 #endif
+			}
+			else
+				allowCapture = false;
 		}
 		else
 			allowCapture = false;
@@ -321,18 +329,23 @@ void wxSFMLCanvas::OnLeftMouseUp(wxMouseEvent& event)
 void wxSFMLCanvas::OnScrollWheel(wxMouseEvent& event)
 {
 	int delta = event.GetWheelRotation();
-	if(delta < 0)
+	// max zoom out = 10% (1.9f)
+	// max zoom in = 175% (0.25f)
+	if(delta < 0 && m_zoomlevel > 10)	// zoom out (increase zoom value == increasing view size)
 	{
 		m_zoom += 0.05f;
-		m_zoomlevel += 5;
-	}
-	else if(delta > 0)
-	{
-		m_zoom -= 0.05f;
 		m_zoomlevel -= 5;
 	}
-	ClampTo(m_zoom, 0.1f, 2.5f);
-	ClampTo(m_zoomlevel, 10, 250);
+	else if(delta > 0 && m_zoomlevel < 175) // zoom in (decrease zoom value == decrease view size)
+	{
+		m_zoom -= 0.05f;
+		m_zoomlevel += 5;
+	}
+	//ClampTo(m_zoom, 0.1f, 1.85f);
+	//ClampTo(m_zoomlevel, 10, 250);
+
+	DanStatusBar *bar = static_cast<DanStatusBar *>(theFrame->GetStatusBar());
+	bar->SetZoomValue(m_zoomlevel);
 }
 
 void wxSFMLCanvas::OnLeaveWindow(wxMouseEvent& event)

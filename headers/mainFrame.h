@@ -5,6 +5,23 @@
 
 #define DANVERSION "BETA 2"
 
+class DanStatusBar : public wxStatusBar
+{
+public:
+	DanStatusBar(wxWindow *parent, long style);
+
+	void OnSize(wxSizeEvent& event);
+	void OnZoomSliderChange(wxCommandEvent& event);
+
+	void SetZoomValue(int val);
+	
+	wxSlider *zoomSlider;
+	wxStaticText *zoomText;
+	wxStaticText *zoomValue;
+
+	wxDECLARE_EVENT_TABLE();
+};
+
 class DanFrame : public wxFrame
 {
 public:
@@ -25,7 +42,7 @@ public:
 //protected:
 	// Panels
 	wxPanel *DanPanel;
-	wxStatusBar *DanStatus;
+	DanStatusBar *DanStatus;
 
 	// Menu Bar
 	wxMenu *menuFile;
@@ -223,4 +240,7 @@ enum
 	ID_YSPIN,
 	ID_VIEWCODE,
 	ID_EXPORTCODE,
+
+	ID_STATUS_RESIZE,
+	ID_STATUS_ZOOM,
 };
