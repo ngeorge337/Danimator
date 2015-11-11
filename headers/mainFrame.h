@@ -22,6 +22,10 @@ public:
 	wxDECLARE_EVENT_TABLE();
 };
 
+int wxCALLBACK ListStringComparison(wxIntPtr item1, wxIntPtr item2, wxIntPtr WXUNUSED(sortData));
+
+int ComputeStringHash(const std::string &str);
+
 class DanFrame : public wxFrame
 {
 public:
@@ -51,7 +55,8 @@ public:
 	wxMenuBar *menuBar;
 
 	// The States list
-	wxListBox *StateListCtrl;
+	//wxListBox *StateListCtrl;
+	wxListView *StateListCtrl;
 	wxButton *newStateButton;
 	wxButton *delStateButton;
 	wxButton *viewCodeButton;
@@ -61,10 +66,10 @@ public:
 	wxPanel *spritePanel;
 	wxPanel *soundPanel;
 	wxNotebook *ResourcesNotebook;
-	wxListBox *SpritesListCtrl;
+	wxListView *SpritesListCtrl;
 	wxButton *loadSpriteButton;
 	wxButton *delSpriteButton;
-	wxListBox *SoundsListCtrl;
+	wxListView *SoundsListCtrl;
 	wxButton *loadSoundButton;
 	wxButton *delSoundButton;
 
@@ -169,7 +174,7 @@ private:
 
 	void OnNewState(wxCommandEvent& event);
 	void OnDeleteState(wxCommandEvent& event);
-	void OnStateSelection(wxCommandEvent& event);
+	void OnStateSelection(wxListEvent& event);
 
 	void UpdateTimeline();
 
@@ -177,8 +182,8 @@ private:
 	void OnDeleteSprite(wxCommandEvent& event);
 	void OnAddSound(wxCommandEvent& event);
 	void OnDeleteSound(wxCommandEvent& event);
-	void OnSelectSprite(wxCommandEvent& event);
-	void OnSelectSound(wxCommandEvent& event);
+	void OnSelectSprite(wxListEvent& event);
+	void OnSelectSound(wxListEvent& event);
 
 	void OnAddFrame(wxCommandEvent& event);
 	void OnDeleteFrame(wxCommandEvent& event);
@@ -243,4 +248,17 @@ enum
 
 	ID_STATUS_RESIZE,
 	ID_STATUS_ZOOM,
+};
+
+enum
+{
+	COL_STATE_FRAMES = 1,
+	COL_STATE_DURATION,
+
+	COL_SPRITES_SOURCE = 1,
+	COL_SPRITES_SIZE,
+	COL_SPRITES_DIMS,
+
+	COL_SOUNDS_SOURCE = 1,
+	COL_SOUNDS_SIZE,
 };

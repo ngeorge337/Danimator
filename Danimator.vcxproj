@@ -114,6 +114,7 @@
     <ClInclude Include="headers\static.h" />
     <ClInclude Include="headers\strmanip.h" />
     <ClInclude Include="headers\texman.h" />
+    <ClInclude Include="headers\textualPanel.h" />
     <ClInclude Include="headers\thread.h" />
     <ClInclude Include="headers\token.h" />
     <ClInclude Include="headers\util.h" />
@@ -141,6 +142,7 @@
     <ClCompile Include="src\soundman.cpp" />
     <ClCompile Include="src\strmanip.cpp" />
     <ClCompile Include="src\texman.cpp" />
+    <ClCompile Include="src\textualPanel.cpp" />
     <ClCompile Include="src\thread.cpp" />
     <ClCompile Include="src\token.cpp" />
     <ClCompile Include="src\waiting.cpp" />

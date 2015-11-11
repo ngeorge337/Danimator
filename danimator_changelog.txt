@@ -7,6 +7,7 @@ Beta 2 Changelog
 -Fixed being able to use the editor controls after deleting a state, causing possible crashes
 -Fixed bug where an embedding option was not saving to config file
 -Fixed some text alignments
+-Fixed bug where you could delete the default blank sprite/sound options in the resource lists
 -Project name now shows up in the titlebar when saved or loaded
 -Slight change to DECORATE code formatting (one less tab indent)
 -Reduced size of Code window a bit to accomodate (less screen cluttering)
@@ -14,3 +15,4 @@ Beta 2 Changelog
 -Added bilinear filtering option to the Settings menu
 -Removed the minimum 2-frame requirement; states can now be created empty (as a safeguard; if modifications are attempted on an empty state, an empty frame will be inserted before editing continues)
 -Added mouse scroll wheel zooming
+-Added data columns to state and resource lists indicating additional information like frame count, dimensions, etc.

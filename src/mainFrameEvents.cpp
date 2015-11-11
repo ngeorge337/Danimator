@@ -21,12 +21,12 @@ EVT_BUTTON(ID_ADDSOUND, DanFrame::OnAddSound)
 EVT_BUTTON(ID_DELSOUND, DanFrame::OnDeleteSound)
 EVT_BUTTON(ID_ADDFRAME, DanFrame::OnAddFrame)
 EVT_BUTTON(ID_DELFRAME, DanFrame::OnDeleteFrame)
-EVT_LISTBOX(ID_STATELIST, DanFrame::OnStateSelection)
+EVT_LIST_ITEM_SELECTED(ID_STATELIST, DanFrame::OnStateSelection)
 EVT_BUTTON(ID_VIEWCODE, DanFrame::OnViewCode)
 EVT_BUTTON(ID_EXPORTCODE, DanFrame::OnExportCode)
 //EVT_LISTBOX_DCLICK(ID_STATELIST, DanFrame::OnStateSelection)
-EVT_LISTBOX_DCLICK(ID_SELECTSPRITE, DanFrame::OnSelectSprite)
-EVT_LISTBOX_DCLICK(ID_SELECTSOUND, DanFrame::OnSelectSound)
+EVT_LIST_ITEM_ACTIVATED(ID_SELECTSPRITE, DanFrame::OnSelectSprite)
+EVT_LIST_ITEM_ACTIVATED(ID_SELECTSOUND, DanFrame::OnSelectSound)
 EVT_SLIDER(ID_TIMESLIDER, DanFrame::OnSliderChange)
 EVT_SPINCTRL(ID_XSPIN, DanFrame::OnXSpinChange)
 EVT_SPINCTRL(ID_YSPIN, DanFrame::OnYSpinChange)
@@ -75,9 +75,9 @@ void DanFrame::OnNewProject(wxCommandEvent& event)
 		else if(ret == wxID_CANCEL)
 			return;
 	}
-	StateListCtrl->Clear();
-	SpritesListCtrl->Clear();
-	SoundsListCtrl->Clear();
+	StateListCtrl->DeleteAllItems();
+	SpritesListCtrl->DeleteAllItems();
+	SoundsListCtrl->DeleteAllItems();
 	timelineSlider->SetMax(2);
 	timelineSlider->SetValue(1);
 	xSpin->SetValue(0);
@@ -90,8 +90,10 @@ void DanFrame::OnNewProject(wxCommandEvent& event)
 	Locator::GetTextureManager()->CreateEmptyTexture("TNT1A0");
 	Audio::ResetSlots();
 	Locator::GetSoundManager()->UnloadAll();
-	SpritesListCtrl->Append(wxString("* No Sprite (TNT1A0)"));
-	SoundsListCtrl->Append(wxString("* No Sound"));
+	SpritesListCtrl->InsertItem(0, wxString("* No Sprite (TNT1A0)"));
+	SpritesListCtrl->SetItemData(0, -9999);
+	SoundsListCtrl->InsertItem(0, wxString("* No Sound"));
+	SoundsListCtrl->SetItemData(0, -9999);
 
 	this->SetTitle("Danimator");
 
@@ -140,9 +142,9 @@ void DanFrame::OnOpenProject(wxCommandEvent& event)
 	if(fd->ShowModal() == wxID_OK)
 	{
 		// Reset everything to defaults
-		StateListCtrl->Clear();
-		SpritesListCtrl->Clear();
-		SoundsListCtrl->Clear();
+		StateListCtrl->DeleteAllItems();
+		SpritesListCtrl->DeleteAllItems();
+		SoundsListCtrl->DeleteAllItems();
 		timelineSlider->SetMax(2);
 		timelineSlider->SetValue(1);
 		xSpin->SetValue(0);
@@ -155,8 +157,10 @@ void DanFrame::OnOpenProject(wxCommandEvent& event)
 		Locator::GetTextureManager()->CreateEmptyTexture("TNT1A0");
 		Audio::ResetSlots();
 		Locator::GetSoundManager()->UnloadAll();
-		SpritesListCtrl->Append(wxString("* No Sprite (TNT1A0)"));
-		SoundsListCtrl->Append(wxString("* No Sound"));
+		SpritesListCtrl->InsertItem(0, wxString("* No Sprite (TNT1A0)"));
+		SpritesListCtrl->SetItemData(0, -9999);
+		SoundsListCtrl->InsertItem(0, wxString("* No Sound"));
+		SoundsListCtrl->SetItemData(0, -9999);
 
 		// Load project information
 		LoadProject(fd->GetFilename());
@@ -164,10 +168,10 @@ void DanFrame::OnOpenProject(wxCommandEvent& event)
 		saved = true;
 		this->SetTitle(wxString(StripStringExtension(projectName.ToStdString())) + " -- Danimator");
 
-		if(!StateListCtrl->IsEmpty())
+		if(StateListCtrl->GetItemCount() > 0)
 		{
-			StateListCtrl->SetSelection(0, true);
-			animator.SetState(StateListCtrl->GetStringSelection().ToStdString());
+			StateListCtrl->Select(0, true);
+			animator.SetState(StateListCtrl->GetItemText(StateListCtrl->GetFirstSelected()).ToStdString());
 			// We didn't have any states in this project somehow, so let's abort setting controls up
 			if(animator.GetCurrentState() == nullptr)
 				return;
@@ -296,15 +300,15 @@ void DanFrame::OnNewState(wxCommandEvent& event)
 
 		std::string st = txt->GetValue().ToStdString();
 		animator.CreateState(st);
-		StateListCtrl->Append(txt->GetValue());
+		StateListCtrl->InsertItem(StateListCtrl->GetItemCount(), txt->GetValue());
 
 		saved = false;
 
 		if(!animator.m_validStates.empty()) SetStartupMode(false);
 		if(selectIt)
 		{
-			StateListCtrl->SetSelection(0, true);
-			animator.SetState(StateListCtrl->GetString(StateListCtrl->GetSelection()).ToStdString());
+			StateListCtrl->Select(0, true);
+			animator.SetState(StateListCtrl->GetItemText(StateListCtrl->GetFirstSelected()).ToStdString());
 			timelineSlider->SetValue(1);
 			ResetFrame();
 			UpdateTimeline();
@@ -318,11 +322,11 @@ void DanFrame::OnNewState(wxCommandEvent& event)
 
 void DanFrame::OnDeleteState(wxCommandEvent& event)
 {
-	if(StateListCtrl->GetSelection() != wxNOT_FOUND)
+	if(StateListCtrl->GetFirstSelected() != wxNOT_FOUND)
 	{
 		if(playingMode) SetPlayingMode(false);
-		animator.DeleteState(StateListCtrl->GetString(StateListCtrl->GetSelection()).ToStdString());
-		StateListCtrl->Delete(StateListCtrl->GetSelection());
+		animator.DeleteState(StateListCtrl->GetItemText(StateListCtrl->GetFirstSelected()).ToStdString());
+		StateListCtrl->DeleteItem(StateListCtrl->GetFirstSelected());
 
 		saved = false;
 
@@ -332,11 +336,11 @@ void DanFrame::OnDeleteState(wxCommandEvent& event)
 	}
 }
 
-void DanFrame::OnStateSelection(wxCommandEvent& event)
+void DanFrame::OnStateSelection(wxListEvent& event)
 {
-	if(StateListCtrl->GetSelection() != wxNOT_FOUND)
+	if(StateListCtrl->GetFirstSelected() != wxNOT_FOUND)
 	{
-		animator.SetState(StateListCtrl->GetString(StateListCtrl->GetSelection()).ToStdString());
+		animator.SetState(StateListCtrl->GetItemText(StateListCtrl->GetFirstSelected()).ToStdString());
 		timelineSlider->SetValue(1);
 		ResetFrame();
 		UpdateTimeline();
@@ -366,7 +370,7 @@ void DanFrame::OnAddSprite(wxCommandEvent& event)
 
 		for(int i = 0; i < fileFullPaths.size(); i++)
 		{
-			if(SpritesListCtrl->FindString(fileNames[i]) != wxNOT_FOUND)
+			if(SpritesListCtrl->FindItem(-1, fileNames[i]) != wxNOT_FOUND)
 				continue;
 
 			if(Locator::GetTextureManager()->Precache(fileFullPaths[i].ToStdString()))
@@ -376,26 +380,34 @@ void DanFrame::OnAddSprite(wxCommandEvent& event)
 				set_uppercase(fn);
 				wxString finalstr = fn;
 				Locator::GetTextureManager()->Remap(fileFullPaths[i].ToStdString(), finalstr.ToStdString());
-				SpritesListCtrl->Append(finalstr);
+				SpritesListCtrl->InsertItem(SpritesListCtrl->GetItemCount(), finalstr);
+				SpritesListCtrl->SetItemData(SpritesListCtrl->GetItemCount() - 1, ComputeStringHash(SpritesListCtrl->GetItemText(SpritesListCtrl->GetItemCount() - 1).ToStdString()));
+				SpritesListCtrl->SetItem(SpritesListCtrl->GetItemCount() - 1, COL_SPRITES_SOURCE, fileFullPaths[i]);
+				int width = Locator::GetTextureManager()->GetTexture(finalstr.ToStdString())->getSize().x;
+				int height = Locator::GetTextureManager()->GetTexture(finalstr.ToStdString())->getSize().y;
+				SpritesListCtrl->SetItem(SpritesListCtrl->GetItemCount() - 1, COL_SPRITES_SIZE, std::to_string(int(4 * width * height)));
+				SpritesListCtrl->SetItem(SpritesListCtrl->GetItemCount() - 1, COL_SPRITES_DIMS, std::to_string(width) + "x" + std::to_string(height));
+				
 				finalstr = "";
 
 				saved = false;
 			}
 		}
+		SpritesListCtrl->SortItems(ListStringComparison, 0);
 	}
 }
 
 void DanFrame::OnDeleteSprite(wxCommandEvent& event)
 {
-	if(SpritesListCtrl->GetSelection() != wxNOT_FOUND)
+	if(SpritesListCtrl->GetFirstSelected() != wxNOT_FOUND && SpritesListCtrl->GetItemText(SpritesListCtrl->GetFirstSelected()).CmpNoCase(wxString("* No Sprite (TNT1A0)")) != 0 )
 	{
-		Locator::GetTextureManager()->Unload(SpritesListCtrl->GetString(SpritesListCtrl->GetSelection()).ToStdString());
+		Locator::GetTextureManager()->Unload(SpritesListCtrl->GetItemText(SpritesListCtrl->GetFirstSelected()).ToStdString());
 
 		for(auto it = animator.m_validStates.begin(); it != animator.m_validStates.end(); ++it)
 		{
 			for(int i = 0; i < it->second.m_frames.size(); i++)
 			{
-				if(it->second.GetFrame(i).spriteName == SpritesListCtrl->GetStringSelection().ToStdString())
+				if(it->second.GetFrame(i).spriteName == SpritesListCtrl->GetItemText(SpritesListCtrl->GetFirstSelected()).ToStdString())
 				{
 					it->second.GetFrame(i).spriteName = "TNT1A0";
 					it->second.GetFrame(i).sprite.setTexture(*Locator::GetTextureManager()->GetTexture("TNT1A0"));
@@ -403,7 +415,7 @@ void DanFrame::OnDeleteSprite(wxCommandEvent& event)
 			}
 		}
 
-		SpritesListCtrl->Delete(SpritesListCtrl->GetSelection());
+		SpritesListCtrl->DeleteItem(SpritesListCtrl->GetFirstSelected());
 
 		saved = false;
 	}
@@ -433,31 +445,36 @@ void DanFrame::OnAddSound(wxCommandEvent& event)
 			else
 				continue;
 
-			if(SoundsListCtrl->FindString(sndAlias) != wxNOT_FOUND)
+			if(SoundsListCtrl->FindItem(-1, sndAlias) != wxNOT_FOUND)
 				continue;
 
 			if(Locator::GetSoundManager()->Precache(fileFullPaths[i].ToStdString()))
 			{
 				Locator::GetSoundManager()->Remap(fileFullPaths[i].ToStdString(), sndAlias.ToStdString());
-				SoundsListCtrl->Append(sndAlias);
-
+				SoundsListCtrl->InsertItem(SoundsListCtrl->GetItemCount(), sndAlias);
+				SoundsListCtrl->SetItemData(SoundsListCtrl->GetItemCount() - 1, ComputeStringHash(SoundsListCtrl->GetItemText(SoundsListCtrl->GetItemCount() - 1).ToStdString()));
+				SoundsListCtrl->SetItem(SoundsListCtrl->GetItemCount() - 1, COL_SOUNDS_SOURCE, fileFullPaths[i].ToStdString());
+				int sndsz = Locator::GetSoundManager()->GetSound(sndAlias.ToStdString())->getSampleCount() * sizeof(sf::Int16);
+				SoundsListCtrl->SetItem(SoundsListCtrl->GetItemCount() - 1, COL_SOUNDS_SIZE, std::to_string(sndsz));
+				
 				saved = false;
 			}
 		}
+		SoundsListCtrl->SortItems(ListStringComparison, 0);
 	}
 }
 
 void DanFrame::OnDeleteSound(wxCommandEvent& event)
 {
-	if(SoundsListCtrl->GetSelection() != wxNOT_FOUND)
+	if(SoundsListCtrl->GetFirstSelected() != wxNOT_FOUND && SoundsListCtrl->GetItemText(SoundsListCtrl->GetFirstSelected()) != wxString("* No Sound"))
 	{
-		Locator::GetSoundManager()->Unload(SoundsListCtrl->GetString(SoundsListCtrl->GetSelection()).ToStdString());
+		Locator::GetSoundManager()->Unload(SoundsListCtrl->GetItemText(SoundsListCtrl->GetFirstSelected()).ToStdString());
 
 		for(auto it = animator.m_validStates.begin(); it != animator.m_validStates.end(); ++it)
 		{
 			for(int i = 0; i < it->second.m_frames.size(); i++)
 			{
-				if(it->second.GetFrame(i).soundName == SoundsListCtrl->GetStringSelection().ToStdString())
+				if(it->second.GetFrame(i).soundName == SoundsListCtrl->GetItemText(SoundsListCtrl->GetFirstSelected()).ToStdString())
 				{
 					it->second.GetFrame(i).soundName = "";
 					it->second.GetFrame(i).hasSound = false;
@@ -465,7 +482,7 @@ void DanFrame::OnDeleteSound(wxCommandEvent& event)
 			}
 		}
 
-		SoundsListCtrl->Delete(SoundsListCtrl->GetSelection());
+		SoundsListCtrl->DeleteItem(SoundsListCtrl->GetFirstSelected());
 
 		saved = false;
 	}
@@ -502,36 +519,36 @@ void DanFrame::OnDeleteFrame(wxCommandEvent& event)
 
 }
 
-void DanFrame::OnSelectSprite(wxCommandEvent& event)
+void DanFrame::OnSelectSprite(wxListEvent& event)
 {
 	if(animator.GetCurrentState() == nullptr)
 		return;
-	if(!SpritesListCtrl->GetString(SpritesListCtrl->GetSelection()).CmpNoCase(wxString("* No Sprite (TNT1A0)")))
+	if(!SpritesListCtrl->GetItemText(SpritesListCtrl->GetFirstSelected()).CmpNoCase(wxString("* No Sprite (TNT1A0)")))
 	{
 		animator.GetCurrentState()->GetCurrentFrame().sprite.setTexture(*Locator::GetTextureManager()->GetTexture("TNT1A0"), true);
 		animator.GetCurrentState()->GetCurrentFrame().spriteName = "TNT1A0";
 	}
 	else
 	{
-		animator.GetCurrentState()->GetCurrentFrame().sprite.setTexture(*Locator::GetTextureManager()->GetTexture(SpritesListCtrl->GetString(SpritesListCtrl->GetSelection()).ToStdString()), true);
-		animator.GetCurrentState()->GetCurrentFrame().spriteName = SpritesListCtrl->GetString(SpritesListCtrl->GetSelection()).ToStdString();
+		animator.GetCurrentState()->GetCurrentFrame().sprite.setTexture(*Locator::GetTextureManager()->GetTexture(SpritesListCtrl->GetItemText(SpritesListCtrl->GetFirstSelected()).ToStdString()), true);
+		animator.GetCurrentState()->GetCurrentFrame().spriteName = SpritesListCtrl->GetItemText(SpritesListCtrl->GetFirstSelected()).ToStdString();
 	}
 	currentSpriteCtrl->SetValue(animator.GetCurrentState()->GetCurrentFrame().spriteName);
 	saved = false;
 }
 
-void DanFrame::OnSelectSound(wxCommandEvent& event)
+void DanFrame::OnSelectSound(wxListEvent& event)
 {
 	if(animator.GetCurrentState() == nullptr)
 		return;
-	if(SoundsListCtrl->GetString(SoundsListCtrl->GetSelection()) == wxString("* No Sound"))
+	if(SoundsListCtrl->GetItemText(SoundsListCtrl->GetFirstSelected()) == wxString("* No Sound"))
 	{
 		animator.GetCurrentState()->GetCurrentFrame().soundName = "";
 		animator.GetCurrentState()->GetCurrentFrame().hasSound = false;
 	}
 	else
 	{
-		animator.GetCurrentState()->GetCurrentFrame().soundName = SoundsListCtrl->GetString(SoundsListCtrl->GetSelection()).ToStdString();
+		animator.GetCurrentState()->GetCurrentFrame().soundName = SoundsListCtrl->GetItemText(SoundsListCtrl->GetFirstSelected()).ToStdString();
 		animator.GetCurrentState()->GetCurrentFrame().hasSound = true;
 	}
 
@@ -608,6 +625,7 @@ void DanFrame::OnDurationSpinChange(wxSpinEvent& event)
 		return;
 	animator.GetCurrentState()->GetCurrentFrame().tics = durationSpin->GetValue();
 	animator.GetCurrentState()->GetCurrentFrame().duration = TICS(durationSpin->GetValue());
+	UpdateTimeline();
 	saved = false;
 }
 

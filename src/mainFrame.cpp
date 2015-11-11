@@ -21,7 +21,7 @@ DanFrame::DanFrame(const wxString& title, const wxPoint& pos, const wxSize& size
 	BuildCanvasControls();
 	
 	// Finalize Sizers
-	tempSizer->Add(ResourcesNotebook, 1, wxEXPAND);
+	tempSizer->Add(ResourcesNotebook, 2, wxEXPAND);
 	tempSizer->Add(stateSizer, 1, wxEXPAND);
 	DanSizer->Add(tempSizer, 1, wxEXPAND);
 	//DanSizer->Add(stateSizer, 1, wxEXPAND);
@@ -32,6 +32,8 @@ DanFrame::DanFrame(const wxString& title, const wxPoint& pos, const wxSize& size
 	DanPanel->SetSizerAndFit(DanSizer);
 
 	SetStartupMode(true);
+
+	//DanPanel->Hide();
 
 	CenterOnScreen();
 }
@@ -266,6 +268,11 @@ void DanFrame::UpdateTimeline()
 {
 	if(animator.GetCurrentState() != nullptr)
 	{
+		int totalTime = 0;
+		StateListCtrl->SetItem(StateListCtrl->GetFirstSelected(), COL_STATE_FRAMES, std::to_string(animator.GetCurrentState()->m_frames.size()));
+		for(int i = 0; i < animator.GetCurrentState()->m_frames.size(); i++)
+			totalTime += animator.GetCurrentState()->m_frames[i].tics;
+		StateListCtrl->SetItem(StateListCtrl->GetFirstSelected(), COL_STATE_DURATION, std::to_string(totalTime));
 		if(animator.GetCurrentState()->m_frames.size() >= 2)
 			timelineSlider->SetMax(animator.GetCurrentState()->m_frames.size());
 		else
@@ -595,13 +602,20 @@ void DanFrame::LoadProject(const wxString &fileName)
 			Locator::GetTextureManager()->Precache(texFile);
 			Locator::GetTextureManager()->Remap(std::string(texFile), std::string(texKey));
 		}
-		SpritesListCtrl->Append(std::string(texKey));
+		SpritesListCtrl->InsertItem(SpritesListCtrl->GetItemCount(), std::string(texKey));
+		SpritesListCtrl->SetItemData(SpritesListCtrl->GetItemCount() - 1, ComputeStringHash(SpritesListCtrl->GetItemText(SpritesListCtrl->GetItemCount() - 1).ToStdString()));
+		SpritesListCtrl->SetItem(SpritesListCtrl->GetItemCount() - 1, COL_SPRITES_SOURCE, hasTextureEmbed ? "Embedded" : texFile);
+		int width = Locator::GetTextureManager()->GetTexture(texKey)->getSize().x;
+		int height = Locator::GetTextureManager()->GetTexture(texKey)->getSize().y;
+		SpritesListCtrl->SetItem(SpritesListCtrl->GetItemCount() - 1, COL_SPRITES_SIZE, std::to_string(int(4 * width * height)));
+		SpritesListCtrl->SetItem(SpritesListCtrl->GetItemCount() - 1, COL_SPRITES_DIMS, std::to_string(width) + "x" + std::to_string(height));
 
 		if(texKey)			delete[] texKey;
 		if(texFileName)		delete[] texFileName;
 		if(texDir)			delete[] texDir;
 		if(textureData)		delete[] textureData;
 	}
+	SpritesListCtrl->SortItems(ListStringComparison, 0);
 
 	// Load Sounds
 	int soundCount = 0;
@@ -666,13 +680,18 @@ void DanFrame::LoadProject(const wxString &fileName)
 			Locator::GetSoundManager()->Precache(sndFile);
 			Locator::GetSoundManager()->Remap(std::string(sndFile), std::string(sndKey));
 		}
-		SoundsListCtrl->Append(std::string(sndKey));
+		SoundsListCtrl->InsertItem(SoundsListCtrl->GetItemCount(), std::string(sndKey));
+		SoundsListCtrl->SetItemData(SoundsListCtrl->GetItemCount() - 1, ComputeStringHash(SoundsListCtrl->GetItemText(SoundsListCtrl->GetItemCount() - 1).ToStdString()));
+		SoundsListCtrl->SetItem(SoundsListCtrl->GetItemCount() - 1, COL_SOUNDS_SOURCE, hasSoundEmbed ? "Embedded" : sndFile);
+		int sndsz = Locator::GetSoundManager()->GetSound(sndKey)->getSampleCount() * sizeof(sf::Int16);
+		SoundsListCtrl->SetItem(SoundsListCtrl->GetItemCount() - 1, COL_SOUNDS_SIZE, std::to_string(sndsz));
 
 		if(sndKey)			delete[] sndKey;
 		if(sndFileName)		delete[] sndFileName;
 		if(sndDir)			delete[] sndDir;
 		if(soundData)		delete[] soundData;
 	}
+	SoundsListCtrl->SortItems(ListStringComparison, 0);
 
 	// Load States and Animation Frames
 	int frameCount = 0;
@@ -739,7 +758,7 @@ void DanFrame::LoadProject(const wxString &fileName)
 		if(!animator.IsValidState(stateLabel))
 		{
 			animator.CreateState(stateLabel);
-			StateListCtrl->Append(stateLabel); // No safety check. #YOLO
+			StateListCtrl->InsertItem(StateListCtrl->GetItemCount(), stateLabel); // No safety check. #YOLO
 		}
 		animator.GetState(stateLabel)->ending = flowControl;
 		if(flowControl == END_GOTO)
@@ -795,4 +814,24 @@ void DanStatusBar::OnZoomSliderChange(wxCommandEvent& event)
 	wxSFMLCanvas::m_zoomlevel = 5 * zoomSlider->GetValue();
 	wxSFMLCanvas::m_zoom = 2.f - (float(wxSFMLCanvas::m_zoomlevel) * 0.01f);
 	zoomValue->SetLabel(wxString(std::to_string(wxSFMLCanvas::m_zoomlevel) + "%"));
+}
+
+int wxCALLBACK ListStringComparison(wxIntPtr item1, wxIntPtr item2, wxIntPtr WXUNUSED(sortData))
+{
+	if(item1 > item2)
+		return 1;
+	if(item1 < item2)
+		return -1;
+
+	return 0;
+}
+
+int ComputeStringHash(const std::string &str)
+{
+	int r = 0;
+	for(int i = 0; i < str.length(); i++)
+		r += int(str[i]);
+	return r;
+	//std::hash<std::string> hashfn;
+	//return int(hashfn(str));
 }

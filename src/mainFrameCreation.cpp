@@ -63,7 +63,10 @@ void DanFrame::BuildStatesList()
 	stateListSizer = new wxBoxSizer(wxVERTICAL);
 	stateButtonSizer = new wxBoxSizer(wxHORIZONTAL);
 
-	StateListCtrl = new wxListBox(DanPanel, ID_STATELIST, wxPoint(0, 0), wxSize(200, 120), NULL, NULL, wxLB_SINGLE | wxLB_NEEDED_SB | wxLB_SORT);
+	StateListCtrl = new wxListView(DanPanel, ID_STATELIST, wxPoint(0, 0), wxSize(200, 120), wxLC_SINGLE_SEL | wxLC_REPORT | wxLC_HRULES);
+	StateListCtrl->AppendColumn(_T("State"), wxLIST_FORMAT_LEFT, -1);
+	StateListCtrl->AppendColumn(_T("Frames"), wxLIST_FORMAT_LEFT, -1);
+	StateListCtrl->AppendColumn(_T("Tics"), wxLIST_FORMAT_LEFT, -1);
 	stateListSizer->Add(StateListCtrl, 1, wxALIGN_LEFT);
 
 	newStateButton = new wxButton(DanPanel, ID_NEWSTATE, _T("New State"), wxPoint(0, 0), wxSize(32, 32), wxBU_NOTEXT);
@@ -92,7 +95,7 @@ void DanFrame::BuildStatesList()
 void DanFrame::BuildResourceLists()
 {
 	// Resources Notebook
-	ResourcesNotebook = new wxNotebook(DanPanel, wxID_ANY, wxDefaultPosition, wxSize(200, 200), wxNB_BOTTOM);
+	ResourcesNotebook = new wxNotebook(DanPanel, wxID_ANY, wxDefaultPosition, wxSize(200, 240), wxNB_BOTTOM);
 
 	// SPRITES ===============================================
 	spritePageSizer = new wxFlexGridSizer(2, 1, 0, 0);
@@ -102,8 +105,14 @@ void DanFrame::BuildResourceLists()
 
 	spritePanel = new wxPanel(ResourcesNotebook);
 
-	SpritesListCtrl = new wxListBox(spritePanel, ID_SELECTSPRITE, wxPoint(0, 0), wxSize(200, 200), NULL, NULL, wxLB_SINGLE | wxLB_NEEDED_SB | wxLB_SORT);
-	SpritesListCtrl->Append(wxString("* No Sprite (TNT1A0)"));
+	SpritesListCtrl = new wxListView(spritePanel, ID_SELECTSPRITE, wxPoint(0, 0), wxSize(200, 200), wxLC_SINGLE_SEL | wxLC_SORT_ASCENDING | wxLC_REPORT | wxLC_VRULES);
+	SpritesListCtrl->AppendColumn(_T("Sprite"), wxLIST_FORMAT_LEFT, -1);
+	SpritesListCtrl->AppendColumn(_T("Source"), wxLIST_FORMAT_LEFT, -1);
+	SpritesListCtrl->AppendColumn(_T("Size (bytes)"), wxLIST_FORMAT_LEFT, -1);
+	SpritesListCtrl->AppendColumn(_T("Dims"), wxLIST_FORMAT_LEFT, -1);
+	SpritesListCtrl->InsertItem(0, wxString("* No Sprite (TNT1A0)"));
+	SpritesListCtrl->SetItemData(0, -9999);
+	SpritesListCtrl->SetColumnWidth(0, wxLIST_AUTOSIZE);
 	spriteListSizer->Add(SpritesListCtrl, 1, wxALIGN_LEFT);
 
 	loadSpriteButton = new wxButton(spritePanel, ID_ADDSPRITE, _T("Load Sprites..."), wxPoint(0, 0), wxSize(32, 32), wxBU_NOTEXT);
@@ -131,8 +140,13 @@ void DanFrame::BuildResourceLists()
 
 	soundPanel = new wxPanel(ResourcesNotebook);
 
-	SoundsListCtrl = new wxListBox(soundPanel, ID_SELECTSOUND, wxPoint(0, 0), wxSize(200, 200), NULL, NULL, wxLB_SINGLE | wxLB_NEEDED_SB | wxLB_SORT);
-	SoundsListCtrl->Append(wxString("* No Sound"));
+	SoundsListCtrl = new wxListView(soundPanel, ID_SELECTSOUND, wxPoint(0, 0), wxSize(200, 200), wxLC_SINGLE_SEL | wxLC_SORT_ASCENDING | wxLC_REPORT | wxLC_VRULES);
+	SoundsListCtrl->AppendColumn(_T("Sound"), wxLIST_FORMAT_LEFT, -1);
+	SoundsListCtrl->AppendColumn(_T("Source"), wxLIST_FORMAT_LEFT, -1);
+	SoundsListCtrl->AppendColumn(_T("Size (bytes)"), wxLIST_FORMAT_LEFT, -1);
+	SoundsListCtrl->InsertItem(0, wxString("* No Sound"));
+	SoundsListCtrl->SetItemData(0, -9999);
+	SoundsListCtrl->SetColumnWidth(0, wxLIST_AUTOSIZE);
 	soundListSizer->Add(SoundsListCtrl, 1, wxALIGN_LEFT);
 
 	loadSoundButton = new wxButton(soundPanel, ID_ADDSOUND, _T("Load Sounds..."), wxPoint(0, 0), wxSize(32, 32), wxBU_NOTEXT);
@@ -152,7 +166,7 @@ void DanFrame::BuildResourceLists()
 	soundPanel->SetSizer(soundPageSizer);
 	// =======================================================
 
-	ResourcesNotebook->SetPageSize(wxSize(200, 200));
+	ResourcesNotebook->SetPageSize(wxSize(200, 300));
 	ResourcesNotebook->AddPage(spritePanel, _T("Sprites"), true);
 	ResourcesNotebook->AddPage(soundPanel, _T("Sounds"));
 }

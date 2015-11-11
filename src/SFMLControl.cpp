@@ -193,11 +193,9 @@ void wxSFMLCanvas::OnUpdate()
 	this->setView(Camera::GetCamera());
 	clear(sf::Color::Black);
 
-#if USE_RENDERTEXTURE
 	rt->setActive();
 	rt->setView(Camera::GetCamera());
 	rt->clear(sf::Color::Black);
-#endif
 		
 	sf::Vector2f pos;// = mapPixelToCoords(sf::Mouse::getPosition());
 	wxPoint p = ScreenToClient(wxPoint(sf::Mouse::getPosition().x, sf::Mouse::getPosition().y));
@@ -205,17 +203,10 @@ void wxSFMLCanvas::OnUpdate()
 	pos.y = p.y;
 	pos.x = Round(pos.x);
 	pos.y = Round(pos.y);
-#if USE_RENDERTEXTURE
 	pos = rt->mapPixelToCoords(sf::Vector2i(pos));
-#else
-	pos = mapPixelToCoords(sf::Vector2i(pos));
-#endif
 
-#if USE_RENDERTEXTURE
+	// stencil test
 	rt->draw(hudRect);
-#else
-	this->draw(hudRect);
-#endif
 
 	if(theFrame->GetAnimator().GetCurrentState() != nullptr)
 	{
@@ -232,11 +223,7 @@ void wxSFMLCanvas::OnUpdate()
 				outlineRect.setOutlineThickness(1.f);
 				allowCapture = true;
 
-#if USE_RENDERTEXTURE
 				rt->draw(outlineRect);
-#else
-				this->draw(outlineRect);
-#endif
 			}
 			else
 				allowCapture = false;
@@ -263,27 +250,18 @@ void wxSFMLCanvas::OnUpdate()
 	{
 		for(int i = 0; i < 4; i++)
 		{
-#if USE_RENDERTEXTURE
 			rt->draw(crosshairRects[i]);
-#else
-			this->draw(crosshairRects[i]);
-#endif
 		}
 	}
 
-#if USE_RENDERTEXTURE
 	rt->draw(theFrame->GetAnimator());
 	rt->display();
-
 	this->setActive();
 	renderSprite.setTexture(rt->getTexture(), true);
 	renderSprite.setScale(Camera::GetCamera().getSize().x / renderSprite.getLocalBounds().width, Camera::GetCamera().getSize().y / renderSprite.getLocalBounds().height);
 	renderSprite.setOrigin(renderSprite.getLocalBounds().width / 2, renderSprite.getLocalBounds().height / 2);
 	renderSprite.setPosition(Camera::GetCamera().getCenter());
 	this->draw(renderSprite);
-#else
-	this->draw(theFrame->GetAnimator());
-#endif
 }
 
 void wxSFMLCanvas::OnResize(wxSizeEvent& event)

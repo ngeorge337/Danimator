@@ -70,6 +70,7 @@
 #include "wx/notebook.h"
 #include "wx/glcanvas.h"
 #include "wx/spinctrl.h"
+#include "wx/listctrl.h"
 #include "wx/artprov.h"
 #include "wx/imagpng.h"
 #include "wx/ffile.h"
