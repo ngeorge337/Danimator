@@ -8,11 +8,14 @@ Beta 2 Changelog
 -Fixed bug where an embedding option was not saving to config file
 -Fixed some text alignments
 -Fixed bug where you could delete the default blank sprite/sound options in the resource lists
+-Fixed allowing one to open multiple code view windows
+-Fixed potential bug where sprite offsets could be adjusted during animation playback
 -Project name now shows up in the titlebar when saved or loaded
 -Slight change to DECORATE code formatting (one less tab indent)
 -Reduced size of Code window a bit to accomodate (less screen cluttering)
 -Lots of code refactoring for cleanliness (still not perfect though)
 -Added bilinear filtering option to the Settings menu
--Removed the minimum 2-frame requirement; states can now be created empty (as a safeguard; if modifications are attempted on an empty state, an empty frame will be inserted before editing continues)
--Added mouse scroll wheel zooming
+-Removed the minimum 2-frame requirement; states can now be created with just 1 frame (if it is meant to be an empty state with just a flow control: add it into your code manually)
+-Added mouse scroll wheel zooming and zooming capability
 -Added data columns to state and resource lists indicating additional information like frame count, dimensions, etc.
+-Added Undo/Redo system for most editing actions

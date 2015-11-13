@@ -33,6 +33,11 @@ public:
 
 	Animator &GetAnimator();
 
+	void UpdateAll();
+	void RebuildStateList();
+
+	void ActionStatus(wxString msg);
+
 	void SaveProject(const wxString &fileName);
 	void LoadProject(const wxString &fileName);
 	void SetPlayingMode(bool mode, bool fromStart = false);
@@ -42,6 +47,8 @@ public:
 
 	wxString GetDecorateCode(const std::string &stateName);
 	wxString GetAllDecorateCode();
+	
+	int OnHotkey(wxKeyEvent& event);
 
 //protected:
 	// Panels
@@ -56,7 +63,7 @@ public:
 
 	// The States list
 	//wxListBox *StateListCtrl;
-	wxListView *StateListCtrl;
+	DanStateList *StateListCtrl;
 	wxButton *newStateButton;
 	wxButton *delStateButton;
 	wxButton *viewCodeButton;
@@ -106,6 +113,7 @@ public:
 	wxCheckBox *crosshairCheckBox;
 	wxCheckBox *allowSoundCheckBox;
 	wxCheckBox *allowGhostCheckBox;
+	wxCheckBox *stencilCheckBox;
 	wxStaticText *ghostFramesText;
 	wxSpinCtrl *ghostFramesSpin;
 
@@ -150,6 +158,15 @@ public:
 	wxString projectName;
 
 private:
+
+	wxTimer *statusTimer;
+	void OnTimer(wxTimerEvent& event);
+
+	void OnIdle(wxIdleEvent& event);
+
+	bool inModal;
+	bool isStatusSet;
+
 	// Construction
 	void BuildMenuBar();
 	void BuildStatusBar();
@@ -175,9 +192,7 @@ private:
 	void OnNewState(wxCommandEvent& event);
 	void OnDeleteState(wxCommandEvent& event);
 	void OnStateSelection(wxListEvent& event);
-
-	void UpdateTimeline();
-
+	
 	void OnAddSprite(wxCommandEvent& event);
 	void OnDeleteSprite(wxCommandEvent& event);
 	void OnAddSound(wxCommandEvent& event);
@@ -193,6 +208,7 @@ private:
 	void UpdateFlow();
 	void UpdateFrameInfo();
 	void UpdateSpins();
+	void UpdateTimeline();
 
 	void OnSliderChange(wxCommandEvent& event);
 
@@ -248,17 +264,5 @@ enum
 
 	ID_STATUS_RESIZE,
 	ID_STATUS_ZOOM,
-};
-
-enum
-{
-	COL_STATE_FRAMES = 1,
-	COL_STATE_DURATION,
-
-	COL_SPRITES_SOURCE = 1,
-	COL_SPRITES_SIZE,
-	COL_SPRITES_DIMS,
-
-	COL_SOUNDS_SOURCE = 1,
-	COL_SOUNDS_SIZE,
+	ID_STATUS_TIMER,
 };

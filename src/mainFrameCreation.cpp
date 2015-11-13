@@ -1,5 +1,7 @@
 #include "libs.h"
 #include "animator.h"
+#include "DanList.h"
+#include "DanStateList.h"
 #include "mainFrame.h"
 #include "codewindow.h"
 #include "preferences.h"
@@ -63,7 +65,8 @@ void DanFrame::BuildStatesList()
 	stateListSizer = new wxBoxSizer(wxVERTICAL);
 	stateButtonSizer = new wxBoxSizer(wxHORIZONTAL);
 
-	StateListCtrl = new wxListView(DanPanel, ID_STATELIST, wxPoint(0, 0), wxSize(200, 120), wxLC_SINGLE_SEL | wxLC_REPORT | wxLC_HRULES);
+	StateListCtrl = new DanStateList(DanPanel, ID_STATELIST, wxPoint(0, 0), wxSize(200, 120), wxLC_SINGLE_SEL | wxLC_REPORT | wxLC_HRULES);
+	//StateListCtrl->DeleteAllItems();
 	StateListCtrl->AppendColumn(_T("State"), wxLIST_FORMAT_LEFT, -1);
 	StateListCtrl->AppendColumn(_T("Frames"), wxLIST_FORMAT_LEFT, -1);
 	StateListCtrl->AppendColumn(_T("Tics"), wxLIST_FORMAT_LEFT, -1);
@@ -262,17 +265,20 @@ void DanFrame::BuildCanvasControls()
 	allowSoundCheckBox = new wxCheckBox(controlBox3->GetStaticBox(), wxID_ANY, _T("Play Sounds"), wxDefaultPosition, wxDefaultSize, wxCHK_2STATE);
 	allowSoundCheckBox->SetValue(true);
 	allowGhostCheckBox = new wxCheckBox(controlBox3->GetStaticBox(), wxID_ANY, _T("Ghosting"), wxDefaultPosition, wxDefaultSize, wxCHK_2STATE);
+	stencilCheckBox = new wxCheckBox(controlBox3->GetStaticBox(), wxID_ANY, _T("Stencil"), wxDefaultPosition, wxDefaultSize, wxCHK_2STATE);
 	ghostFramesText = new wxStaticText(controlBox3->GetStaticBox(), wxID_ANY, _T("Ghost Frames"), wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
 	ghostFramesSpin = new wxSpinCtrl(controlBox3->GetStaticBox(), wxID_ANY, _T("1"), wxDefaultPosition, wxSize(60, 24), wxSP_ARROW_KEYS | wxALIGN_RIGHT, 1, 10, 1);
 	ghostSizer = new wxBoxSizer(wxHORIZONTAL);
-	ghostSizer->Add(ghostFramesSpin, 0, wxLEFT | wxRIGHT, 4);
+	ghostSizer->Add(ghostFramesSpin, 1, wxLEFT | wxRIGHT, 4);
 	ghostSizer->AddSpacer(2);
-	ghostSizer->Add(ghostFramesText, 0, wxTOP | wxRIGHT, 4);
+	ghostSizer->Add(ghostFramesText, 1, wxTOP | wxRIGHT, 4);
 	controlBox3->Add(crosshairCheckBox, 0, wxLEFT | wxRIGHT | wxTOP, 4);
 	controlBox3->AddSpacer(2);
 	controlBox3->Add(allowSoundCheckBox, 0, wxLEFT | wxRIGHT, 4);
 	controlBox3->AddSpacer(2);
 	controlBox3->Add(allowGhostCheckBox, 0, wxLEFT | wxRIGHT, 4);
+	controlBox3->AddSpacer(2);
+	controlBox3->Add(stencilCheckBox, 0, wxLEFT | wxRIGHT, 4);
 	controlBox3->AddSpacer(2);
 	controlBox3->Add(ghostSizer);
 

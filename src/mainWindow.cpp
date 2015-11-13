@@ -39,3 +39,11 @@ int DanApp::OnExit()
 	cfg->WriteConfig();
 	return wxApp::OnExit();
 }
+
+int DanApp::FilterEvent(wxEvent& event)
+{
+	if(event.GetEventType() == wxEVT_KEY_DOWN)
+		return theFrame->OnHotkey((wxKeyEvent&)event);
+
+	return wxApp::FilterEvent(event);
+}

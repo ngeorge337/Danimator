@@ -1,9 +1,15 @@
 #include "libs.h"
 #include "animator.h"
+#include "DanList.h"
+#include "DanStateList.h"
 #include "codewindow.h"
 #include "mainFrame.h"
 
 extern DanFrame *theFrame;
+
+wxBEGIN_EVENT_TABLE(DanCode, wxFrame)
+EVT_CLOSE(DanCode::OnClose)
+wxEND_EVENT_TABLE()
 
 DanCode::DanCode(wxWindow *parent, const wxString& title, const wxPoint& pos, const wxSize& size)
 	: wxFrame(parent, wxID_ANY, title, pos, size)
@@ -21,4 +27,10 @@ DanCode::DanCode(wxWindow *parent, const wxString& title, const wxPoint& pos, co
 void DanCode::OnExit(wxCommandEvent& event)
 {
 	Close(true);
+}
+
+void DanCode::OnClose(wxCloseEvent& event)
+{
+	theFrame->codeView = nullptr;
+	Destroy();
 }

@@ -73,6 +73,8 @@ class Animator : public sf::Drawable
 {
 	friend class DanFrame;
 	friend class DanCode;
+	friend class ActionManager;
+	friend class DanStateList;
 public:
 	Animator();
 

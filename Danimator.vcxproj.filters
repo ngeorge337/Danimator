@@ -24,6 +24,9 @@
     <Filter Include="GUI\Textures">
       <UniqueIdentifier>{f83d9570-3c0f-46bf-a657-72ba2946ec8a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Controls">
+      <UniqueIdentifier>{62823b32-ef0d-444c-950d-062d849f12ca}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="headers\libs.h">
@@ -119,6 +122,15 @@
     <ClInclude Include="headers\textualPanel.h">
       <Filter>GUI\Textures</Filter>
     </ClInclude>
+    <ClInclude Include="headers\actionmanager.h">
+      <Filter>GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="headers\DanList.h">
+      <Filter>Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="headers\DanStateList.h">
+      <Filter>Controls</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\animator.cpp">
@@ -192,6 +204,15 @@
     </ClCompile>
     <ClCompile Include="src\textualPanel.cpp">
       <Filter>GUI\Textures</Filter>
+    </ClCompile>
+    <ClCompile Include="src\actionmanager.cpp">
+      <Filter>GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="src\DanList.cpp">
+      <Filter>Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="src\DanStateList.cpp">
+      <Filter>Controls</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

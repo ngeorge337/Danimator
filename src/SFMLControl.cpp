@@ -1,7 +1,14 @@
 #include "libs.h"
 #include "animator.h"
+#include "DanList.h"
+#include "DanStateList.h"
 #include "SFMLControl.h"
 #include "mainFrame.h"
+#include "actionmanager.h"
+#include "resrcman.h"
+#include "texman.h"
+#include "soundman.h"
+#include "locator.h"
 
 #define USE_RENDERTEXTURE 1
 
@@ -110,6 +117,9 @@ wxControl(Parent, Id, Position, Size, Style)
 
 void wxSFMLCanvas::OnUpdate()
 {
+
+	bool stencil = theFrame->stencilCheckBox->GetValue();
+
 	/*
 	Camera::GetCamera().setSize(
 		sf::Vector2f(theFrame->glCanvas->GetSize().x % 2 == 0 ? theFrame->glCanvas->GetSize().x : theFrame->glCanvas->GetSize().x - 1,
@@ -206,15 +216,26 @@ void wxSFMLCanvas::OnUpdate()
 	pos = rt->mapPixelToCoords(sf::Vector2i(pos));
 
 	// stencil test
+	if(stencil)
+	{
+		glEnable(GL_STENCIL_TEST);
+		glClearStencil(0);
+		glClear(GL_STENCIL_BUFFER_BIT);
+		glStencilMask(0xFF);
+
+		glStencilFunc(GL_ALWAYS, 1, 0xFF);
+		glStencilOp(GL_REPLACE, GL_REPLACE, GL_REPLACE);
+	}
 	rt->draw(hudRect);
 
-	if(theFrame->GetAnimator().GetCurrentState() != nullptr)
+	if(theFrame->GetAnimator().GetCurrentState() != nullptr && theFrame->GetAnimator().GetCurrentState()->m_frames.size() > 0 && !theFrame->playingMode)
 	{
 		if(this->GetScreenRect().Contains(wxGetMousePosition()))
 		{
 			if(isCapturing || theFrame->GetAnimator().GetCurrentState()->GetCurrentFrame().sprite.getGlobalBounds().contains(pos))
 			{
 				// draw outlining rect
+				if(stencil) glDisable(GL_STENCIL_TEST);
 				outlineRect = sf::RectangleShape(sf::Vector2f(theFrame->GetAnimator().GetCurrentState()->GetCurrentFrame().sprite.getTexture()->getSize()));
 				outlineRect.setFillColor(sf::Color::Transparent);
 				outlineRect.setSize(sf::Vector2f(outlineRect.getSize().x - 2, outlineRect.getSize().y - 2));
@@ -224,6 +245,8 @@ void wxSFMLCanvas::OnUpdate()
 				allowCapture = true;
 
 				rt->draw(outlineRect);
+
+				if(stencil) glEnable(GL_STENCIL_TEST);
 			}
 			else
 				allowCapture = false;
@@ -232,10 +255,12 @@ void wxSFMLCanvas::OnUpdate()
 			allowCapture = false;
 	}
 
-	if(allowCapture && capturemode && sf::Mouse::isButtonPressed(sf::Mouse::Button::Left))
+	if(allowCapture && capturemode && sf::Mouse::isButtonPressed(sf::Mouse::Button::Left) && !theFrame->playingMode)
 	{
 		if(theFrame->GetAnimator().GetCurrentState() != nullptr)
 		{
+			if(!isCapturing)
+				Locator::GetActionManager()->Insert(CMDTYPE_FRAMES, FormatString("Drag offset for %s, frame %d", theFrame->GetAnimator().GetCurrentState()->name, theFrame->GetAnimator().GetCurrentState()->GetOffset() + 1));
 			isCapturing = true;
 			sf::Vector2i diff = sf::Vector2i(pos) - lastPos;
 			lastPos = sf::Vector2i(pos);
@@ -248,13 +273,23 @@ void wxSFMLCanvas::OnUpdate()
 
 	if(theFrame->crosshairCheckBox->GetValue())
 	{
+		if(stencil) glDisable(GL_STENCIL_TEST);
 		for(int i = 0; i < 4; i++)
 		{
 			rt->draw(crosshairRects[i]);
 		}
+		if(stencil) glEnable(GL_STENCIL_TEST);
 	}
 
+	if(stencil)
+	{
+		glStencilFunc(GL_EQUAL, 1, 0xFF);
+		glStencilOp(GL_KEEP, GL_REPLACE, GL_REPLACE);
+	}
 	rt->draw(theFrame->GetAnimator());
+
+	if(stencil) glDisable(GL_STENCIL_TEST);
+
 	rt->display();
 	this->setActive();
 	renderSprite.setTexture(rt->getTexture(), true);
@@ -282,6 +317,7 @@ void wxSFMLCanvas::OnResize(wxSizeEvent& event)
 void wxSFMLCanvas::OnLeftMouseDown(wxMouseEvent& event)
 {
 	event.Skip();
+	if(theFrame->playingMode) return;
 	sf::Vector2f pos;// = mapPixelToCoords(sf::Mouse::getPosition());
 	wxPoint p = ScreenToClient(wxPoint(sf::Mouse::getPosition().x, sf::Mouse::getPosition().y));
 	pos.x = p.x;
@@ -300,8 +336,8 @@ void wxSFMLCanvas::OnLeftMouseDown(wxMouseEvent& event)
 void wxSFMLCanvas::OnLeftMouseUp(wxMouseEvent& event)
 {
 	event.Skip();
-	isCapturing = false;
 	capturemode = false;
+	isCapturing = false;
 }
 
 void wxSFMLCanvas::OnScrollWheel(wxMouseEvent& event)

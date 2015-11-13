@@ -74,6 +74,7 @@
 #include "wx/artprov.h"
 #include "wx/imagpng.h"
 #include "wx/ffile.h"
+#include "wx/cmdproc.h"
 
 #include "util.h"
 #include "static.h"

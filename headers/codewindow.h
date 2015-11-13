@@ -9,6 +9,9 @@ public:
 	wxPanel *codePanel;
 	wxTextCtrl *codeText;
 
+	wxDECLARE_EVENT_TABLE();
+
 private:
 	void OnExit(wxCommandEvent& event);
+	void OnClose(wxCloseEvent& event);
 };

@@ -1,8 +1,11 @@
 #include "libs.h"
 #include "animator.h"
+#include "DanList.h"
+#include "DanStateList.h"
 #include "mainFrame.h"
 #include "codewindow.h"
 #include "preferences.h"
+#include "actionmanager.h"
 
 wxBEGIN_EVENT_TABLE(DanFrame, wxFrame)
 EVT_CLOSE(DanFrame::OnClose)
@@ -36,12 +39,89 @@ EVT_BUTTON(ID_PREVFRAME, DanFrame::OnPrevFrame)
 EVT_BUTTON(ID_PLAY, DanFrame::OnPlay)
 EVT_BUTTON(ID_PLAYFROMSTART, DanFrame::OnPlayFromStart)
 EVT_CHOICE(ID_ENDING, DanFrame::OnFlowGoto)
+//EVT_KEY_DOWN(DanFrame::OnHotkey)
+EVT_TIMER(ID_STATUS_TIMER, DanFrame::OnTimer)
+EVT_IDLE(DanFrame::OnIdle)
 wxEND_EVENT_TABLE()
 
 wxBEGIN_EVENT_TABLE(DanStatusBar, wxStatusBar)
 EVT_SIZE(DanStatusBar::OnSize)
 EVT_SLIDER(ID_STATUS_ZOOM, DanStatusBar::OnZoomSliderChange)
 wxEND_EVENT_TABLE()
+
+int DanFrame::OnHotkey(wxKeyEvent& event)
+{
+	if(inModal)
+		return -1;
+
+	wxChar keyid = event.GetKeyCode();
+
+	// Play/Stop -> Space
+	if(keyid == WXK_SPACE)
+	{
+		OnPlay(wxCommandEvent());
+		event.Skip();
+		return true;
+	}
+
+	else if(!playingMode)
+	{
+		// Save -> Ctrl-S
+		if(keyid == 'S' && event.GetModifiers() == wxMOD_CONTROL)
+		{
+			OnSaveProject(wxCommandEvent());
+			event.Skip();
+			return true;
+		}
+
+		// New Project -> Ctrl-N
+		else if(keyid == 'N' && event.GetModifiers() == wxMOD_CONTROL)
+		{
+			OnNewProject(wxCommandEvent());
+			event.Skip();
+			return true;
+		}
+
+		// Open Project -> Ctrl-O
+		else if(keyid == 'O' && event.GetModifiers() == wxMOD_CONTROL)
+		{
+			OnOpenProject(wxCommandEvent());
+			event.Skip();
+			return true;
+		}
+
+		// Undo -> Ctrl-Z
+		else if(keyid == 'Z' && event.GetModifiers() == wxMOD_CONTROL)
+		{
+			Locator::GetActionManager()->Undo();
+			event.Skip();
+			return true;
+		}
+
+		// Redo -> Ctrl-Y
+		else if(keyid == 'Y' && event.GetModifiers() == wxMOD_CONTROL)
+		{
+			Locator::GetActionManager()->Redo();
+			event.Skip();
+			return true;
+		}
+	}
+	return -1;
+}
+
+void DanFrame::OnTimer(wxTimerEvent& event)
+{
+	DanStatus->SetStatusText("Ready");
+}
+
+void DanFrame::OnIdle(wxIdleEvent& event)
+{
+	wxString frm = "Frame: ";
+	if(playingMode) frm += "Playing";
+	else
+		frm += timelineSlider->IsEnabled() ? std::to_string(timelineSlider->GetValue()) : "1";
+	DanStatus->SetStatusText(frm, 1);	
+}
 
 void DanFrame::OnNewProject(wxCommandEvent& event)
 {
@@ -75,7 +155,7 @@ void DanFrame::OnNewProject(wxCommandEvent& event)
 		else if(ret == wxID_CANCEL)
 			return;
 	}
-	StateListCtrl->DeleteAllItems();
+	StateListCtrl->DanDeleteAllItems();
 	SpritesListCtrl->DeleteAllItems();
 	SoundsListCtrl->DeleteAllItems();
 	timelineSlider->SetMax(2);
@@ -88,6 +168,7 @@ void DanFrame::OnNewProject(wxCommandEvent& event)
 	animator.ClearStates();
 	Locator::GetTextureManager()->UnloadAll();
 	Locator::GetTextureManager()->CreateEmptyTexture("TNT1A0");
+	Locator::GetActionManager()->Wipe();
 	Audio::ResetSlots();
 	Locator::GetSoundManager()->UnloadAll();
 	SpritesListCtrl->InsertItem(0, wxString("* No Sprite (TNT1A0)"));
@@ -142,7 +223,7 @@ void DanFrame::OnOpenProject(wxCommandEvent& event)
 	if(fd->ShowModal() == wxID_OK)
 	{
 		// Reset everything to defaults
-		StateListCtrl->DeleteAllItems();
+		StateListCtrl->DanDeleteAllItems();
 		SpritesListCtrl->DeleteAllItems();
 		SoundsListCtrl->DeleteAllItems();
 		timelineSlider->SetMax(2);
@@ -157,6 +238,7 @@ void DanFrame::OnOpenProject(wxCommandEvent& event)
 		Locator::GetTextureManager()->CreateEmptyTexture("TNT1A0");
 		Audio::ResetSlots();
 		Locator::GetSoundManager()->UnloadAll();
+		Locator::GetActionManager()->Wipe();
 		SpritesListCtrl->InsertItem(0, wxString("* No Sprite (TNT1A0)"));
 		SpritesListCtrl->SetItemData(0, -9999);
 		SoundsListCtrl->InsertItem(0, wxString("* No Sound"));
@@ -230,6 +312,7 @@ void DanFrame::OnSettings(wxCommandEvent& event)
 {
 	PreferencesDialog *pd = new PreferencesDialog(this);
 	pd->CenterOnParent();
+	inModal = true;
 	if(pd->ShowModal() == wxID_OK)
 	{
 		b_embedSprites = pd->embedSpritesCheckbox->GetValue();
@@ -237,6 +320,7 @@ void DanFrame::OnSettings(wxCommandEvent& event)
 		r_bilinear = pd->bilinearCheckbox->GetValue();
 		Locator::GetTextureManager()->SetFiltering(r_bilinear);
 	}
+	inModal = false;
 }
 
 void DanFrame::OnExit(wxCommandEvent& event)
@@ -277,30 +361,38 @@ void DanFrame::OnExit(wxCommandEvent& event)
 
 void DanFrame::OnAbout(wxCommandEvent& event)
 {
-	wxMessageBox("Danimator\nA friggin' ZDoom Animation Program\n\nby Nick 'patience' George\n(A.K.A. Theshooter7)\n\nIcon art by Wartorn\n\nVersion " DANVERSION,
+	inModal = true;
+	wxMessageBox("Danimator\nA friggin' ZDoom Animation Program\n\n© 2015 Nick George\n\nIcon art by Wartorn\n\nVersion " DANVERSION,
 				 "About Danimator", wxOK | wxICON_INFORMATION);
+	inModal = false;
 }
 
 void DanFrame::OnNewState(wxCommandEvent& event)
 {
 	wxTextEntryDialog *txt = new wxTextEntryDialog(this, _T("Enter the State Name:"), _T("New State"), wxEmptyString);
+	inModal = true;
 	if(txt->ShowModal() == wxID_OK)
 	{
 		if(txt->GetValue().IsEmpty())
+		{
+			inModal = false;
 			return;
+		}
 
 		if(animator.IsValidState(txt->GetValue().ToStdString()))
 		{
 			wxMessageBox("Failed to add new state -- Label already exists!",
 						 "New State", wxOK | wxICON_WARNING);
+			inModal = false;
 			return;
 		}
 
-		bool selectIt = animator.m_validStates.empty();
+		bool selectIt = (animator.m_validStates.empty() || StateListCtrl->GetFirstSelected() == -1 ? true : false);
 
 		std::string st = txt->GetValue().ToStdString();
-		animator.CreateState(st);
-		StateListCtrl->InsertItem(StateListCtrl->GetItemCount(), txt->GetValue());
+		Locator::GetActionManager()->Insert(CMDTYPE_FRAMES, FormatString("Create state - %s", st));
+		animator.CreateState(st)->AddEmptyFrame();
+		StateListCtrl->DanPushBack(txt->GetValue());
 
 		saved = false;
 
@@ -311,13 +403,14 @@ void DanFrame::OnNewState(wxCommandEvent& event)
 			animator.SetState(StateListCtrl->GetItemText(StateListCtrl->GetFirstSelected()).ToStdString());
 			timelineSlider->SetValue(1);
 			ResetFrame();
-			UpdateTimeline();
-			UpdateSpins();
-			UpdateFrameInfo();
-			UpdateFlow();
 			playFrame = 0;
 		}
+		UpdateTimeline();
+		UpdateSpins();
+		UpdateFrameInfo();
+		UpdateFlow();
 	}
+	inModal = false;
 }
 
 void DanFrame::OnDeleteState(wxCommandEvent& event)
@@ -325,8 +418,10 @@ void DanFrame::OnDeleteState(wxCommandEvent& event)
 	if(StateListCtrl->GetFirstSelected() != wxNOT_FOUND)
 	{
 		if(playingMode) SetPlayingMode(false);
+		std::string stateName = StateListCtrl->GetItemText(StateListCtrl->GetFirstSelected()).ToStdString();
+		Locator::GetActionManager()->Insert(CMDTYPE_FRAMES, FormatString("Delete state - %s", stateName));
 		animator.DeleteState(StateListCtrl->GetItemText(StateListCtrl->GetFirstSelected()).ToStdString());
-		StateListCtrl->DeleteItem(StateListCtrl->GetFirstSelected());
+		StateListCtrl->DanDeleteItem(StateListCtrl->GetFirstSelected());
 
 		saved = false;
 
@@ -343,15 +438,16 @@ void DanFrame::OnStateSelection(wxListEvent& event)
 		animator.SetState(StateListCtrl->GetItemText(StateListCtrl->GetFirstSelected()).ToStdString());
 		timelineSlider->SetValue(1);
 		ResetFrame();
-		UpdateTimeline();
-		UpdateSpins();
-		UpdateFrameInfo();
-		UpdateFlow();
 		playFrame = 0;
 		if(inStartup)
 			SetStartupMode(false);
 		else
 			SetStatelessControls(true);
+
+		UpdateTimeline();
+		UpdateSpins();
+		UpdateFrameInfo();
+		UpdateFlow();
 	}
 }
 
@@ -361,6 +457,7 @@ void DanFrame::OnAddSprite(wxCommandEvent& event)
 		"All Supported Images|*.png;*.bmp;*.tga;*.jpg;*.jpeg;*.gif"
 		);
 	wxFileDialog *fd = new wxFileDialog(this, _T("Open Sprites"), wxEmptyString, wxEmptyString, Filters, wxFD_OPEN | wxFD_FILE_MUST_EXIST | wxFD_MULTIPLE | wxFD_CHANGE_DIR);
+	inModal = true;
 	if(fd->ShowModal() == wxID_OK)
 	{
 		wxArrayString fileFullPaths;
@@ -395,6 +492,7 @@ void DanFrame::OnAddSprite(wxCommandEvent& event)
 		}
 		SpritesListCtrl->SortItems(ListStringComparison, 0);
 	}
+	inModal = false;
 }
 
 void DanFrame::OnDeleteSprite(wxCommandEvent& event)
@@ -428,6 +526,7 @@ void DanFrame::OnAddSound(wxCommandEvent& event)
 		"All Supported Sounds|*.ogg;*.wav;*.flac;*.aiff;*.au;*.raw;*.voc"
 		);
 	wxFileDialog *fd = new wxFileDialog(this, _T("Open Sounds"), wxEmptyString, wxEmptyString, Filters, wxFD_OPEN | wxFD_FILE_MUST_EXIST | wxFD_MULTIPLE | wxFD_CHANGE_DIR);
+	inModal = true;
 	if(fd->ShowModal() == wxID_OK)
 	{
 		wxArrayString fileFullPaths;
@@ -462,6 +561,7 @@ void DanFrame::OnAddSound(wxCommandEvent& event)
 		}
 		SoundsListCtrl->SortItems(ListStringComparison, 0);
 	}
+	inModal = false;
 }
 
 void DanFrame::OnDeleteSound(wxCommandEvent& event)
@@ -492,6 +592,7 @@ void DanFrame::OnAddFrame(wxCommandEvent& event)
 {
 	if(animator.GetCurrentState() == nullptr)
 		return;
+	Locator::GetActionManager()->Insert(CMDTYPE_FRAMES, FormatString("Add frame to '%s'", animator.GetCurrentState()->name));
 	animator.GetCurrentState()->AddEmptyFrame();
 	UpdateTimeline();
 	timelineSlider->SetValue(timelineSlider->GetMax());
@@ -505,8 +606,9 @@ void DanFrame::OnAddFrame(wxCommandEvent& event)
 
 void DanFrame::OnDeleteFrame(wxCommandEvent& event)
 {
-	if(animator.GetCurrentState() == nullptr)
+	if(animator.GetCurrentState() == nullptr || animator.GetCurrentState()->m_frames.size() <= 1)
 		return;
+	Locator::GetActionManager()->Insert(CMDTYPE_FRAMES, FormatString("Delete frame from '%s'", animator.GetCurrentState()->name));
 	animator.GetCurrentState()->RemoveFrame(timelineSlider->GetValue() - 1);
 	UpdateTimeline();
 	ResetFrame();
@@ -523,6 +625,7 @@ void DanFrame::OnSelectSprite(wxListEvent& event)
 {
 	if(animator.GetCurrentState() == nullptr)
 		return;
+	Locator::GetActionManager()->Insert(CMDTYPE_FRAMES, FormatString("Change sprite to '%s'", SpritesListCtrl->GetItemText(SpritesListCtrl->GetFirstSelected()).ToStdString()));
 	if(!SpritesListCtrl->GetItemText(SpritesListCtrl->GetFirstSelected()).CmpNoCase(wxString("* No Sprite (TNT1A0)")))
 	{
 		animator.GetCurrentState()->GetCurrentFrame().sprite.setTexture(*Locator::GetTextureManager()->GetTexture("TNT1A0"), true);
@@ -541,6 +644,7 @@ void DanFrame::OnSelectSound(wxListEvent& event)
 {
 	if(animator.GetCurrentState() == nullptr)
 		return;
+	Locator::GetActionManager()->Insert(CMDTYPE_FRAMES, FormatString("Change sound to '%s'", SoundsListCtrl->GetItemText(SoundsListCtrl->GetFirstSelected()).ToStdString()));
 	if(SoundsListCtrl->GetItemText(SoundsListCtrl->GetFirstSelected()) == wxString("* No Sound"))
 	{
 		animator.GetCurrentState()->GetCurrentFrame().soundName = "";
@@ -570,6 +674,7 @@ void DanFrame::OnXSpinChange(wxSpinEvent& event)
 {
 	if(animator.GetCurrentState() == nullptr)
 		return;
+	Locator::GetActionManager()->Insert(CMDTYPE_FRAMES, FormatString("Changed X offset for %s, frame %d", animator.GetCurrentState()->name, animator.GetCurrentState()->GetOffset() + 1));
 	animator.GetCurrentState()->GetCurrentFrame().sprite.setPosition(xSpin->GetValue(), animator.GetCurrentState()->GetCurrentFrame().sprite.getPosition().y);
 	saved = false;
 }
@@ -578,6 +683,7 @@ void DanFrame::OnYSpinChange(wxSpinEvent& event)
 {
 	if(animator.GetCurrentState() == nullptr)
 		return;
+	Locator::GetActionManager()->Insert(CMDTYPE_FRAMES, FormatString("Changed Y offset for %s, frame %d", animator.GetCurrentState()->name, animator.GetCurrentState()->GetOffset() + 1));
 	animator.GetCurrentState()->GetCurrentFrame().sprite.setPosition(animator.GetCurrentState()->GetCurrentFrame().sprite.getPosition().x, ySpin->GetValue());
 	saved = false;
 }
@@ -702,6 +808,8 @@ void DanFrame::OnFlowGoto(wxCommandEvent& event)
 
 void DanFrame::OnViewCode(wxCommandEvent& event)
 {
+	if(codeView)
+		codeView->Close();
 	codeView = new DanCode(this, _T("View Code"), wxDefaultPosition, wxSize(300, 200));
 }
 
@@ -711,10 +819,12 @@ void DanFrame::OnExportCode(wxCommandEvent& event)
 		"Text Files \t(*.txt)|*.txt"
 		);
 	wxFileDialog *fd = new wxFileDialog(this, _T("Export DECORATE Code"), wxEmptyString, wxEmptyString, Filters, wxFD_SAVE | wxFD_CHANGE_DIR | wxFD_OVERWRITE_PROMPT);
+	inModal = true;
 	if(fd->ShowModal() == wxID_OK)
 	{
 		wxString code = GetAllDecorateCode();
 		wxFFile file(fd->GetFilename(), "w");
 		file.Write(code);
 	}
+	inModal = false;
 }

@@ -1,15 +1,22 @@
 #include "libs.h"
 #include "animator.h"
+#include "DanList.h"
+#include "DanStateList.h"
 #include "mainFrame.h"
 #include "codewindow.h"
 #include "preferences.h"
+#include "actionmanager.h"
 
 
 DanFrame::DanFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
-: wxFrame(NULL, wxID_ANY, title, pos, size), playingMode(false), playFrame(0), saved(true), projectName(""), inStartup(true)
+	: wxFrame(NULL, wxID_ANY, title, pos, size), playingMode(false), playFrame(0), saved(true), projectName(""), inStartup(true), inModal(false)
 {
+	statusTimer = new wxTimer(this, ID_STATUS_TIMER);
+	//statusTimer->Start(5000);
+
 	BuildMenuBar();
 	BuildStatusBar();
+	DanStatus->SetStatusText("Ready");
 
 	// Add the panel so we can "mount" controls to it
 	DanPanel = new wxPanel(this);
@@ -49,6 +56,7 @@ void DanFrame::SetControls(bool controls)
 	SoundsListCtrl->Enable(controls);
 	loadSoundButton->Enable(controls);
 	delSoundButton->Enable(controls);
+	exportCodeButton->Enable(controls);
 	xSpin->Enable(controls);
 	ySpin->Enable(controls);
 	currentSpriteCtrl->Enable(controls);
@@ -67,7 +75,7 @@ void DanFrame::SetControls(bool controls)
 void DanFrame::SetStatelessControls(bool controls)
 {
 	//StateListCtrl->Enable(controls);
-	newStateButton->Enable(controls);
+	//newStateButton->Enable(controls);
 	delStateButton->Enable(controls);
 	SpritesListCtrl->Enable(controls);
 	loadSpriteButton->Enable(controls);
@@ -75,6 +83,8 @@ void DanFrame::SetStatelessControls(bool controls)
 	SoundsListCtrl->Enable(controls);
 	loadSoundButton->Enable(controls);
 	delSoundButton->Enable(controls);
+	viewCodeButton->Enable(controls);
+	exportCodeButton->Enable(controls);
 	xSpin->Enable(controls);
 	ySpin->Enable(controls);
 	currentSpriteCtrl->Enable(controls);
@@ -241,6 +251,8 @@ void DanFrame::EnableTimelineIfValid()
 
 void DanFrame::UpdateSpins()
 {
+	if(animator.GetCurrentState() == nullptr)
+		return;
 	xSpin->SetValue(animator.GetCurrentState()->GetCurrentFrame().sprite.getPosition().x);
 	ySpin->SetValue(animator.GetCurrentState()->GetCurrentFrame().sprite.getPosition().y);
 }
@@ -248,6 +260,8 @@ void DanFrame::UpdateSpins()
 
 void DanFrame::UpdateFrameInfo()
 {
+	if(animator.GetCurrentState() == nullptr)
+		return;
 	currentSpriteCtrl->SetValue(animator.GetCurrentState()->GetCurrentFrame().spriteName);
 	currentSoundCtrl->SetValue(animator.GetCurrentState()->GetCurrentFrame().soundName);
 	durationSpin->SetValue(animator.GetCurrentState()->GetCurrentFrame().tics);
@@ -255,6 +269,8 @@ void DanFrame::UpdateFrameInfo()
 
 void DanFrame::UpdateFlow()
 {
+	if(animator.GetCurrentState() == nullptr)
+		return;
 	endChoice->SetSelection(animator.GetCurrentState()->ending);
 
 	if(endChoice->GetSelection() == END_GOTO)
@@ -266,13 +282,19 @@ void DanFrame::UpdateFlow()
 
 void DanFrame::UpdateTimeline()
 {
+	StateListCtrl->OnUpdateInfo();
 	if(animator.GetCurrentState() != nullptr)
 	{
-		int totalTime = 0;
-		StateListCtrl->SetItem(StateListCtrl->GetFirstSelected(), COL_STATE_FRAMES, std::to_string(animator.GetCurrentState()->m_frames.size()));
-		for(int i = 0; i < animator.GetCurrentState()->m_frames.size(); i++)
-			totalTime += animator.GetCurrentState()->m_frames[i].tics;
-		StateListCtrl->SetItem(StateListCtrl->GetFirstSelected(), COL_STATE_DURATION, std::to_string(totalTime));
+		/*
+		if(StateListCtrl->GetFirstSelected() != -1)
+		{
+			int totalTime = 0;
+			StateListCtrl->DanSetItem(StateListCtrl->GetFirstSelected(), COL_STATE_FRAMES, std::to_string(animator.GetCurrentState()->m_frames.size()));
+			for(int i = 0; i < animator.GetCurrentState()->m_frames.size(); i++)
+				totalTime += animator.GetCurrentState()->m_frames[i].tics;
+			StateListCtrl->DanSetItem(StateListCtrl->GetFirstSelected(), COL_STATE_DURATION, std::to_string(totalTime));
+		}
+		*/
 		if(animator.GetCurrentState()->m_frames.size() >= 2)
 			timelineSlider->SetMax(animator.GetCurrentState()->m_frames.size());
 		else
@@ -283,7 +305,8 @@ void DanFrame::UpdateTimeline()
 
 void DanFrame::ResetFrame()
 {
-	animator.GetCurrentState()->Reset(timelineSlider->GetValue() - 1);
+	if(animator.GetCurrentState() != nullptr)
+		animator.GetCurrentState()->Reset(timelineSlider->GetValue() - 1);
 }
 
 void DanFrame::SaveProject(const wxString &fileName)
@@ -758,7 +781,7 @@ void DanFrame::LoadProject(const wxString &fileName)
 		if(!animator.IsValidState(stateLabel))
 		{
 			animator.CreateState(stateLabel);
-			StateListCtrl->InsertItem(StateListCtrl->GetItemCount(), stateLabel); // No safety check. #YOLO
+			StateListCtrl->DanPushBack(wxString(stateLabel)); // No safety check. #YOLO
 		}
 		animator.GetState(stateLabel)->ending = flowControl;
 		if(flowControl == END_GOTO)
@@ -776,10 +799,45 @@ void DanFrame::LoadProject(const wxString &fileName)
 	}
 }
 
+void DanFrame::UpdateAll()
+{
+	if(animator.GetCurrentState() == nullptr)
+		SetStatelessControls(false);
+	UpdateTimeline();
+	UpdateSpins();
+	UpdateFrameInfo();
+	UpdateFlow();
+	if(animator.GetCurrentState() == nullptr)
+		timelineSlider->SetValue(1);
+	else
+		timelineSlider->SetValue(GetAnimator().GetCurrentState()->frameOffset + 1);
+}
+
+void DanFrame::ActionStatus(wxString msg)
+{
+	DanStatus->SetStatusText(msg);
+	isStatusSet = true;
+	statusTimer->StartOnce(5000);
+}
+
+void DanFrame::RebuildStateList()
+{
+	StateListCtrl->DeleteAllItems();
+	for(auto it = GetAnimator().m_validStates.begin(); it != GetAnimator().m_validStates.end(); ++it)
+	{
+		int totalTime = 0;
+		int indx = StateListCtrl->InsertItem(StateListCtrl->GetItemCount(), it->second.name);
+		StateListCtrl->DanSetItem(indx, COL_STATE_FRAMES, wxString(std::to_string(it->second.m_frames.size())));
+		for(int i = 0; i < it->second.m_frames.size(); i++)
+			totalTime += it->second.m_frames[i].tics;
+		StateListCtrl->DanSetItem(indx, COL_STATE_DURATION, wxString(std::to_string(totalTime)));
+	}
+}
+
 DanStatusBar::DanStatusBar(wxWindow *parent, long style) : wxStatusBar(parent, wxID_ANY, style, "DanStatusBar")
 {
 	SetFieldsCount(3);
-	int fieldsizes[3] = { -2, -1, 180 };
+	int fieldsizes[3] = { -2, 105, 180 };
 	SetStatusWidths(3, fieldsizes);
 
 	zoomText = new wxStaticText(this, wxID_ANY, "Zoom: ", wxPoint(GetSize().GetWidth() - 198, 0), wxDefaultSize, 0);

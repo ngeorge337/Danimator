@@ -89,6 +89,7 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="headers\actionmanager.h" />
     <ClInclude Include="headers\animator.h" />
     <ClInclude Include="headers\audio.h" />
     <ClInclude Include="headers\bimap.h" />
@@ -99,6 +100,8 @@
     <ClInclude Include="headers\configfile.h" />
     <ClInclude Include="headers\console.h" />
     <ClInclude Include="headers\cvar.h" />
+    <ClInclude Include="headers\DanList.h" />
+    <ClInclude Include="headers\DanStateList.h" />
     <ClInclude Include="headers\externcvar.h" />
     <ClInclude Include="headers\file.h" />
     <ClInclude Include="headers\libs.h" />
@@ -122,6 +125,7 @@
     <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\actionmanager.cpp" />
     <ClCompile Include="src\animator.cpp" />
     <ClCompile Include="src\audio.cpp" />
     <ClCompile Include="src\camera.cpp" />
@@ -130,6 +134,8 @@
     <ClCompile Include="src\configfile.cpp" />
     <ClCompile Include="src\console.cpp" />
     <ClCompile Include="src\cvar.cpp" />
+    <ClCompile Include="src\DanList.cpp" />
+    <ClCompile Include="src\DanStateList.cpp" />
     <ClCompile Include="src\file.cpp" />
     <ClCompile Include="src\locator.cpp" />
     <ClCompile Include="src\main.cpp" />
