@@ -15,6 +15,7 @@
 #include "locator.h"
 #include "audio.h"
 #include "animator.h"
+#include "textualPanel.h"
 #include "mainFrame.h"
 
 extern DanFrame *theFrame;

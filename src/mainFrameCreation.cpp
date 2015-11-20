@@ -2,6 +2,7 @@
 #include "animator.h"
 #include "DanList.h"
 #include "DanStateList.h"
+#include "textualPanel.h"
 #include "mainFrame.h"
 #include "codewindow.h"
 #include "preferences.h"
@@ -12,16 +13,16 @@ void DanFrame::BuildMenuBar()
 	// FILE menu
 	menuFile = new wxMenu;
 	wxMenuItem *mNewProject = new wxMenuItem(menuFile, ID_NEWPROJECT, _T("New Project"), _T("Start a new project"));
-	mNewProject->SetBitmap(wxArtProvider::GetBitmap(wxART_NEW));
+	mNewProject->SetBitmap(wxArtProvider::GetBitmap(wxART_NEW, wxART_OTHER, wxSize(16, 16)));
 
 	wxMenuItem *mOpenProject = new wxMenuItem(menuFile, ID_OPENPROJECT, _T("Open Project"), _T("Open an existing project"));
-	mOpenProject->SetBitmap(wxArtProvider::GetBitmap(wxART_FILE_OPEN));
+	mOpenProject->SetBitmap(wxArtProvider::GetBitmap(wxART_FILE_OPEN, wxART_OTHER, wxSize(16, 16)));
 
 	wxMenuItem *mSave = new wxMenuItem(menuFile, ID_SAVEPROJECT, _T("Save Project"), _T("Save the current project"));
-	mSave->SetBitmap(wxArtProvider::GetBitmap(wxART_FILE_SAVE));
+	mSave->SetBitmap(wxArtProvider::GetBitmap(wxART_FILE_SAVE, wxART_OTHER, wxSize(16, 16)));
 
 	wxMenuItem *mSaveAs = new wxMenuItem(menuFile, ID_SAVEPROJECTAS, _T("Save Project As..."), _T("Save the current project to a new file"));
-	mSaveAs->SetBitmap(wxArtProvider::GetBitmap(wxART_FILE_SAVE_AS));
+	mSaveAs->SetBitmap(wxArtProvider::GetBitmap(wxART_FILE_SAVE_AS, wxART_OTHER, wxSize(16, 16)));
 
 	menuFile->Append(mNewProject);
 	menuFile->Append(mOpenProject);
@@ -192,9 +193,9 @@ void DanFrame::BuildCanvasControls()
 	offsetsSizer = new wxBoxSizer(wxHORIZONTAL);
 	currentSpriteSizer = new wxBoxSizer(wxHORIZONTAL);
 	currentSoundSizer = new wxBoxSizer(wxHORIZONTAL);
-	xSpin = new wxSpinCtrl(controlBox1->GetStaticBox(), ID_XSPIN, _T("0"), wxDefaultPosition, wxSize(80, 24), wxSP_ARROW_KEYS | wxALIGN_RIGHT, -1024, 1024, 0);
+	xSpin = new wxSpinCtrl(controlBox1->GetStaticBox(), ID_XSPIN, _T("0"), wxDefaultPosition, wxSize(80, 24), wxSP_ARROW_KEYS | wxALIGN_RIGHT, -65535, 65535, 0);
 	xText = new wxStaticText(controlBox1->GetStaticBox(), wxID_ANY, _T("X:"), wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
-	ySpin = new wxSpinCtrl(controlBox1->GetStaticBox(), ID_YSPIN, _T("0"), wxDefaultPosition, wxSize(80, 24), wxSP_ARROW_KEYS | wxALIGN_RIGHT, -1024, 1024, 0);
+	ySpin = new wxSpinCtrl(controlBox1->GetStaticBox(), ID_YSPIN, _T("0"), wxDefaultPosition, wxSize(80, 24), wxSP_ARROW_KEYS | wxALIGN_RIGHT, -65535, 65535, 0);
 	yText = new wxStaticText(controlBox1->GetStaticBox(), wxID_ANY, _T("Y:"), wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
 
 	currentSpriteText = new wxStaticText(controlBox1->GetStaticBox(), wxID_ANY, _T("Sprite:"), wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
@@ -287,7 +288,7 @@ void DanFrame::BuildCanvasControls()
 	controlSizer->Add(controlBox3, 0, wxEXPAND);
 	controlSizer->AddGrowableCol(1, 1);
 
-	renderSizer->Add(glCanvas, 1, wxEXPAND | wxFIXED_MINSIZE | wxRESERVE_SPACE_EVEN_IF_HIDDEN | wxALL, 4);
+	renderSizer->Add(glCanvas, 1, wxEXPAND | wxFIXED_MINSIZE | wxALL, 4);
 	renderSizer->Add(controlSizer, 1, wxEXPAND | wxBOTTOM | wxRIGHT | wxLEFT, 4);
 	renderSizer->AddGrowableCol(0, 1);
 	renderSizer->AddGrowableRow(0, 1);
@@ -316,12 +317,12 @@ void DanFrame::CreateTimelineButtons()
 	timelineButtonSizer->Add(nextFrameButton, 0, wxALIGN_CENTER_HORIZONTAL);
 
 	addFrameButton = new wxButton(controlBox2->GetStaticBox(), ID_ADDFRAME, _T("Add Frame (uses previous frame's offsets)"), wxPoint(0, 0), wxSize(32, 32), wxBU_NOTEXT);
-	addFrameButton->SetBitmap(wxArtProvider::GetBitmap(wxART_PLUS));
+	addFrameButton->SetBitmap(wxBITMAP_PNG(FRAMEADD));
 	addFrameButton->SetToolTip(_T("Add Frame"));
 	framesButtonSizer->Add(addFrameButton, 0, wxALIGN_CENTER_HORIZONTAL);
 
 	delFrameButton = new wxButton(controlBox2->GetStaticBox(), ID_DELFRAME, _T("Delete Current Frame"), wxPoint(0, 0), wxSize(32, 32), wxBU_NOTEXT);
-	delFrameButton->SetBitmap(wxArtProvider::GetBitmap(wxART_MINUS));
+	delFrameButton->SetBitmap(wxBITMAP_PNG(FRAMEDEL));
 	delFrameButton->SetToolTip(_T("Delete Frame"));
 	framesButtonSizer->Add(delFrameButton, 0, wxALIGN_CENTER_HORIZONTAL);
 }

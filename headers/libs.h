@@ -75,6 +75,9 @@
 #include "wx/imagpng.h"
 #include "wx/ffile.h"
 #include "wx/cmdproc.h"
+#include "wx/renderer.h"
+#include "wx/colour.h"
+#include "wx/clrpicker.h"
 
 #include "util.h"
 #include "static.h"

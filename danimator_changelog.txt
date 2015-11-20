@@ -10,6 +10,7 @@ Beta 2 Changelog
 -Fixed bug where you could delete the default blank sprite/sound options in the resource lists
 -Fixed allowing one to open multiple code view windows
 -Fixed potential bug where sprite offsets could be adjusted during animation playback
+-Fixed size of File menu bitmaps being larger than intended
 -Project name now shows up in the titlebar when saved or loaded
 -Slight change to DECORATE code formatting (one less tab indent)
 -Reduced size of Code window a bit to accomodate (less screen cluttering)
@@ -19,3 +20,6 @@ Beta 2 Changelog
 -Added mouse scroll wheel zooming and zooming capability
 -Added data columns to state and resource lists indicating additional information like frame count, dimensions, etc.
 -Added Undo/Redo system for most editing actions
+-Added Stencil option to hide parts of the sprite frame that go outside of the visible area
+-Replaced +/- icons for add/remove frame with new custom ones
+-Increased range of X/Y offset spinners from +/-1024 to +/-65535 (kinda overkill but hey, it's allowed!)

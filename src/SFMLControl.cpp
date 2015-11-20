@@ -2,6 +2,7 @@
 #include "animator.h"
 #include "DanList.h"
 #include "DanStateList.h"
+#include "textualPanel.h"
 #include "SFMLControl.h"
 #include "mainFrame.h"
 #include "actionmanager.h"
@@ -10,8 +11,6 @@
 #include "soundman.h"
 #include "locator.h"
 
-#define USE_RENDERTEXTURE 1
-
 CVAR(Bool, r_bilinear, true, false, true, "Use bilinear filtering mode in the render view", CVAR_ARCHIVE);
 
 extern DanFrame *theFrame;
@@ -19,29 +18,6 @@ extern DanFrame *theFrame;
 float wxSFMLCanvas::m_zoom = 1.f;
 int wxSFMLCanvas::m_zoomlevel = 100;
 
-sf::Clock engineClock;
-
-double t = 0.0;
-const double dt = 0.01;
-double frameTime = 0.0;
-bool runOnce = false;
-
-double currentTime;
-int tickTime;
-double accumulator = 0.0;
-float interpolation = 0.f;
-
-bool recreate = true;
-
-bool lastFilterSetting = false;
-
-bool capturemode = false;
-bool allowCapture = false;
-bool isCapturing = false;
-static sf::Vector2i lastPos;
-sf::RectangleShape hudRect;
-sf::RectangleShape crosshairRects[4];
-sf::RectangleShape outlineRect;
 
 BEGIN_EVENT_TABLE(wxSFMLCanvas, wxControl)
 EVT_IDLE(wxSFMLCanvas::OnIdle)
@@ -106,78 +82,79 @@ wxControl(Parent, Id, Position, Size, Style)
 	settings.stencilBits = 8;
 	sf::RenderWindow::create(GetHandle(), settings);
 
-#if USE_RENDERTEXTURE
 	rt = new sf::RenderTexture();
 	rt->create(640, 480, true);
 	rt->setSmooth(false);
-#endif
 
 #endif
+
+	engineClock.restart();
+
+	t = 0.0;
+	frameTime = 0.0;
+	runOnce = false;
+	accumulator = 0.0;
+	interpolation = 0.f;
+
+	recreate = true;
+	capturemode = false;
+	allowCapture = false;
+	isCapturing = false;
+
+	currentTime = engineClock.getElapsedTime().asSeconds();
+	tickTime = currentTime;
+
+	hudRect = sf::RectangleShape(sf::Vector2f(320, 200));
+	hudRect.setFillColor(sf::Color::Cyan);
+
+	for(int i = 0; i < 4; i++)
+	{
+		crosshairRects[i].setFillColor(sf::Color::Red);
+	}
+
+	const float GAP = 14.f;
+
+	// Top
+	crosshairRects[0].setSize(sf::Vector2f(4, 12));
+	crosshairRects[0].setOrigin(crosshairRects[0].getSize().x * 0.5f, crosshairRects[0].getSize().y * 0.5f);
+	crosshairRects[0].setPosition(sf::Vector2f(Round(160.f), Round(100.f - GAP)));
+
+	// Right
+	crosshairRects[1].setSize(sf::Vector2f(12, 4));
+	crosshairRects[1].setOrigin(crosshairRects[1].getSize().x * 0.5f, crosshairRects[1].getSize().y * 0.5f);
+	crosshairRects[1].setPosition(sf::Vector2f(Round(160.f + GAP), Round(100.f)));
+
+	// Left
+	crosshairRects[2].setSize(sf::Vector2f(12, 4));
+	crosshairRects[2].setOrigin(crosshairRects[2].getSize().x * 0.5f, crosshairRects[2].getSize().y * 0.5f);
+	crosshairRects[2].setPosition(sf::Vector2f(Round(160.f - GAP), Round(100.f)));
+
+	// Bottom
+	crosshairRects[3].setSize(sf::Vector2f(4, 12));
+	crosshairRects[3].setOrigin(crosshairRects[3].getSize().x * 0.5f, crosshairRects[3].getSize().y * 0.5f);
+	crosshairRects[3].setPosition(sf::Vector2f(Round(160.f), Round(100.f + GAP)));
 }
 
 void wxSFMLCanvas::OnUpdate()
 {
-
 	bool stencil = theFrame->stencilCheckBox->GetValue();
 
-	/*
-	Camera::GetCamera().setSize(
-		sf::Vector2f(theFrame->glCanvas->GetSize().x % 2 == 0 ? theFrame->glCanvas->GetSize().x : theFrame->glCanvas->GetSize().x - 1,
-		theFrame->glCanvas->GetSize().y % 2 == 0 ? theFrame->glCanvas->GetSize().y : theFrame->glCanvas->GetSize().y - 1));
-		*/
+	if(!runOnce)
+	{
+		runOnce = true;
+
+		DanStatusBar *bar = static_cast<DanStatusBar *>(theFrame->GetStatusBar());
+		if(bar) bar->SetZoomValue(m_zoomlevel);
+	}
+
 	Camera::GetCamera().setSize(sf::Vector2f(theFrame->glCanvas->GetSize().x, theFrame->glCanvas->GetSize().y));
 
-#if USE_RENDERTEXTURE
 	if(recreate)
 	{
 		recreate = false;
 		rt->create(Camera::GetCamera().getSize().x, Camera::GetCamera().getSize().y, true);
-		//rt->create(320, 200, false);
-		//sf::Vector2f sz((int)Camera::GetCamera().getSize().x % 2 == 0 ? Camera::GetCamera().getSize().x : Camera::GetCamera().getSize().x - 1,
-		//				(int)Camera::GetCamera().getSize().y % 2 == 0 ? Camera::GetCamera().getSize().y : Camera::GetCamera().getSize().y - 1);
-		//rt->create(sz.x, sz.y, true);
 	}
 	rt->setSmooth(false);
-#endif
-	if(!runOnce)
-	{
-		runOnce = true;
-		currentTime = engineClock.getElapsedTime().asSeconds();
-		tickTime = currentTime;
-
-		DanStatusBar *bar = static_cast<DanStatusBar *>(theFrame->GetStatusBar());
-		if(bar) bar->SetZoomValue(m_zoomlevel);
-
-		hudRect = sf::RectangleShape(sf::Vector2f(320, 200));
-		hudRect.setFillColor(sf::Color::Cyan);
-
-		for(int i = 0; i < 4; i++)
-		{
-			crosshairRects[i].setFillColor(sf::Color::Red);
-		}
-
-		const float GAP = 14.f;
-
-		// Top
-		crosshairRects[0].setSize(sf::Vector2f(4, 12));
-		crosshairRects[0].setOrigin(crosshairRects[0].getSize().x * 0.5f, crosshairRects[0].getSize().y * 0.5f);
-		crosshairRects[0].setPosition(sf::Vector2f(Round(160.f), Round(100.f - GAP)));
-
-		// Right
-		crosshairRects[1].setSize(sf::Vector2f(12, 4));
-		crosshairRects[1].setOrigin(crosshairRects[1].getSize().x * 0.5f, crosshairRects[1].getSize().y * 0.5f);
-		crosshairRects[1].setPosition(sf::Vector2f(Round(160.f + GAP), Round(100.f)));
-
-		// Left
-		crosshairRects[2].setSize(sf::Vector2f(12, 4));
-		crosshairRects[2].setOrigin(crosshairRects[2].getSize().x * 0.5f, crosshairRects[2].getSize().y * 0.5f);
-		crosshairRects[2].setPosition(sf::Vector2f(Round(160.f - GAP), Round(100.f)));
-
-		// Bottom
-		crosshairRects[3].setSize(sf::Vector2f(4, 12));
-		crosshairRects[3].setOrigin(crosshairRects[3].getSize().x * 0.5f, crosshairRects[3].getSize().y * 0.5f);
-		crosshairRects[3].setPosition(sf::Vector2f(Round(160.f), Round(100.f + GAP)));
-	}
 
 	Camera::GetCamera().setCenter(sf::Vector2f(160, 100));
 	Camera::GetCamera().setViewport(sf::FloatRect(0, 0, 1, 1));
@@ -207,13 +184,7 @@ void wxSFMLCanvas::OnUpdate()
 	rt->setView(Camera::GetCamera());
 	rt->clear(sf::Color::Black);
 		
-	sf::Vector2f pos;// = mapPixelToCoords(sf::Mouse::getPosition());
-	wxPoint p = ScreenToClient(wxPoint(sf::Mouse::getPosition().x, sf::Mouse::getPosition().y));
-	pos.x = p.x;
-	pos.y = p.y;
-	pos.x = Round(pos.x);
-	pos.y = Round(pos.y);
-	pos = rt->mapPixelToCoords(sf::Vector2i(pos));
+	sf::Vector2f pos = GetCanvasMousePosition();
 
 	// stencil test
 	if(stencil)
@@ -305,9 +276,8 @@ void wxSFMLCanvas::OnResize(wxSizeEvent& event)
 	// If I recreate here GTK gives an assertion failure.
 	recreate_flag = true;
 #endif
-#if USE_RENDERTEXTURE
+
 	recreate = true;
-#endif
 	sf::Event ev;
 	while(this->pollEvent(ev))
 	{
@@ -318,17 +288,8 @@ void wxSFMLCanvas::OnLeftMouseDown(wxMouseEvent& event)
 {
 	event.Skip();
 	if(theFrame->playingMode) return;
-	sf::Vector2f pos;// = mapPixelToCoords(sf::Mouse::getPosition());
-	wxPoint p = ScreenToClient(wxPoint(sf::Mouse::getPosition().x, sf::Mouse::getPosition().y));
-	pos.x = p.x;
-	pos.y = p.y;
-	pos.x = Round(pos.x);
-	pos.y = Round(pos.y);
-#if USE_RENDERTEXTURE
-	pos = rt->mapPixelToCoords(sf::Vector2i(pos));
-#else
-	pos = mapPixelToCoords(sf::Vector2i(pos));
-#endif
+	sf::Vector2f pos = GetCanvasMousePosition();
+
 	lastPos = sf::Vector2i(pos);
 	capturemode = true;
 }
@@ -367,4 +328,16 @@ void wxSFMLCanvas::OnLeaveWindow(wxMouseEvent& event)
 	event.Skip();
 	isCapturing = false;
 	capturemode = false;
+}
+
+sf::Vector2f wxSFMLCanvas::GetCanvasMousePosition()
+{
+	sf::Vector2f pos;
+	wxPoint p = ScreenToClient(wxPoint(sf::Mouse::getPosition().x, sf::Mouse::getPosition().y));
+	pos.x = p.x;
+	pos.y = p.y;
+	pos.x = Round(pos.x);
+	pos.y = Round(pos.y);
+	pos = rt->mapPixelToCoords(sf::Vector2i(pos));
+	return pos;
 }

@@ -2,6 +2,7 @@
 #include "animator.h"
 #include "DanList.h"
 #include "DanStateList.h"
+#include "textualPanel.h"
 #include "mainFrame.h"
 #include "codewindow.h"
 #include "preferences.h"
@@ -283,12 +284,14 @@ void DanFrame::OnSaveProject(wxCommandEvent& event)
 			SaveProject(fd->GetFilename());
 			projectName = fd->GetFilename();
 			saved = true;
+			ActionStatus("Project saved.");
 		}
 	}
 	else
 	{
 		SaveProject(projectName);
 		saved = true;
+		ActionStatus("Project saved.");
 	}
 }
 
@@ -304,6 +307,7 @@ void DanFrame::OnSaveProjectAs(wxCommandEvent& event)
 		SaveProject(fd->GetFilename());
 		projectName = fd->GetFilename();
 		saved = true;
+		ActionStatus("Project saved.");
 		this->SetTitle(wxString(StripStringExtension(projectName.ToStdString())) + " -- Danimator");
 	}
 }

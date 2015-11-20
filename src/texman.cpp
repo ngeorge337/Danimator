@@ -18,11 +18,17 @@ void TextureManager::SetFiltering(bool enable)
 	{
 		it->second.ptr->setSmooth(enable);
 	}
+
+	for(auto itx = compmap.begin(); itx != compmap.end(); ++itx)
+	{
+		itx->second->GetFinalTexture()->setSmooth(enable);
+	}
 }
 
 void TextureManager::UnloadAll()
 {
 	texmap.clear();
+	compmap.clear();
 }
 
 void TextureManager::ReloadAll()
@@ -35,7 +41,10 @@ void TextureManager::ReloadAll()
 
 void TextureManager::Unload( std::string fileName )
 {
-	texmap.erase(fileName);
+	if(texmap.find(fileName) != texmap.end())
+		texmap.erase(fileName);
+	else if(compmap.find(fileName) != compmap.end())
+		compmap.erase(fileName);
 }
 
 void TextureManager::Reload( std::string fileName )
@@ -82,7 +91,11 @@ bool TextureManager::Precache( std::string fileName )
 
 std::shared_ptr<sf::Texture> TextureManager::GetTexture(std::string name)
 {
-	if(texmap.find(name) == texmap.end())
+	// Search composite textures first, since we don't precache those as they are user-generated
+	if(compmap.find(name) != compmap.end())
+		return compmap[name]->GetFinalTexture();
+
+	else if(texmap.find(name) == texmap.end())
 		Precache(name);
 		//if(!Precache(name))
 		//	return nullptr;
@@ -114,4 +127,106 @@ void TextureManager::CreateEmptyTexture(const std::string &texName)
 	resrc.file_name = texName;
 	resrc.file_dir = "";
 	this->texmap.insert(std::pair<std::string, Resource_t<sf::Texture>>(texName, resrc));
+}
+
+
+//========================================================
+// Composite Texture implementation
+//========================================================
+
+std::shared_ptr<sf::Texture> CompositeTexture::operator=(std::shared_ptr<sf::Texture> t)
+{
+	return m_composite;
+}
+
+void CompositeTexture::DeleteLayer(int pos)
+{
+	if(pos >= m_layers.size())
+		return;
+	auto it = m_layers.begin();
+	std::advance(it, pos);
+	m_layers.erase(it);
+}
+
+void CompositeTexture::MoveLayerDown(int id)
+{
+	// Cannot move a layer 'Down' when it's the bottom-most layer
+	if(id <= 0)
+		return;
+	// Moving "down" moves the layer further out of the vector/towards the front
+	// because we render the layers starting from first item to last
+	// so the last item is drawn over all the others for instance
+	auto it1 = m_layers.begin();
+	auto it2 = m_layers.begin();
+	std::advance(it1, id);
+	std::advance(it2, id - 1);
+	std::iter_swap(it1, it2);
+}
+
+void CompositeTexture::MoveLayerUp(int id)
+{
+	// Cannot move a layer 'Up' when it's the top-most layer
+	if(id >= m_layers.size() - 1)
+		return;
+	// Moving "up" moves the layer further into the vector/towards the back
+	// because we render the layers starting from first item to last
+	// so the last item is drawn over all the others for instance
+	auto it1 = m_layers.begin();
+	auto it2 = m_layers.begin();
+	std::advance(it1, id);
+	std::advance(it2, id + 1);
+	std::iter_swap(it1, it2);
+}
+
+CompositeLayer_t & CompositeTexture::GetLayer(int id)
+{
+	return m_layers[id];
+}
+
+void CompositeTexture::CreateComposite()
+{
+	if(m_composite) m_composite.reset();
+
+	sf::RenderTexture outputTexture;
+	outputTexture.create(m_dims.x, m_dims.y);
+	outputTexture.setActive();
+	outputTexture.clear();
+
+	for(int i = 0; i < m_layers.size(); i++)
+	{
+		if(m_layers[i].isVisible) outputTexture.draw(m_layers[i].spr);
+	}
+
+	outputTexture.display();
+
+	sf::Image img = outputTexture.getTexture().copyToImage();
+	m_composite = std::shared_ptr<sf::Texture>(new sf::Texture());
+	if(!m_composite->loadFromImage(img))
+		Console->LogMessage("Failed to create composite texture!");
+	m_composite->setSmooth(r_bilinear);
+}
+
+std::shared_ptr<sf::Texture> CompositeTexture::GetFinalTexture()
+{
+	return m_composite;
+}
+
+void CompositeTexture::SetDimensions(int w, int h)
+{
+	m_dims = sf::Vector2i(w, h);
+}
+
+sf::Vector2i CompositeTexture::GetDimensions()
+{
+	return m_dims;
+}
+
+CompositeTexture::CompositeTexture() : m_composite(new sf::Texture()), m_dims(sf::Vector2i())
+{
+
+}
+
+std::vector<CompositeLayer_t> & CompositeTexture::GetAllLayers()
+{
+	return m_layers;
 }

@@ -1,6 +1,7 @@
 #include "libs.h"
 #include "animator.h"
 #include "preferences.h"
+#include "textualPanel.h"
 #include "mainFrame.h"
 
 CVAR(Bool, b_embedSprites, true, false, true, "Embed Sprite Resources into Project Files", CVAR_ARCHIVE);

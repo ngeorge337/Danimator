@@ -49,7 +49,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>./src;./headers;./dependencies/freetype/include;./dependencies/dirent/include;./dependencies/SFML/include;./dependencies/OpenAL/include;./dependencies/glm/;./dependencies/glew/include;./dependencies/zlib/include;./dependencies/wxWidgets/include;./dependencies/wxWidgets/include/msvc</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>./src;./headers;./dependencies/freetype/include;./dependencies/dirent/include;./dependencies/SFML/include;./dependencies/OpenAL/include;./dependencies/glm/;./dependencies/glew/include;./dependencies/zlib/include;./dependencies/wxWidgets/include;./dependencies/wxWidgets/include/msvc;./dependencies/wxWidgets/bitmaps</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>GLEW_STATIC;SFML_STATIC;_CRT_SECURE_NO_WARNINGS;WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
@@ -71,7 +71,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>./src;./headers;./dependencies/freetype/include;./dependencies/dirent/include;./dependencies/SFML/include;./dependencies/OpenAL/include;./dependencies/glm/;./dependencies/glew/include;./dependencies/zlib/include;./dependencies/wxWidgets/include;./dependencies/wxWidgets/include/msvc</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>./src;./headers;./dependencies/freetype/include;./dependencies/dirent/include;./dependencies/SFML/include;./dependencies/OpenAL/include;./dependencies/glm/;./dependencies/glew/include;./dependencies/zlib/include;./dependencies/wxWidgets/include;./dependencies/wxWidgets/include/msvc;./dependencies/wxWidgets/bitmaps</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>GLEW_STATIC;SFML_STATIC;_CRT_SECURE_NO_WARNINGS;WIN32;_NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
@@ -95,6 +95,7 @@
     <ClInclude Include="headers\bimap.h" />
     <ClInclude Include="headers\camera.h" />
     <ClInclude Include="headers\ccmd.h" />
+    <ClInclude Include="headers\CheckedListCtrl.h" />
     <ClInclude Include="headers\clamped.h" />
     <ClInclude Include="headers\codewindow.h" />
     <ClInclude Include="headers\configfile.h" />
@@ -118,6 +119,7 @@
     <ClInclude Include="headers\strmanip.h" />
     <ClInclude Include="headers\texman.h" />
     <ClInclude Include="headers\textualPanel.h" />
+    <ClInclude Include="headers\textualView.h" />
     <ClInclude Include="headers\thread.h" />
     <ClInclude Include="headers\token.h" />
     <ClInclude Include="headers\util.h" />
@@ -130,6 +132,7 @@
     <ClCompile Include="src\audio.cpp" />
     <ClCompile Include="src\camera.cpp" />
     <ClCompile Include="src\ccmd.cpp" />
+    <ClCompile Include="src\CheckedListCtrl.cpp" />
     <ClCompile Include="src\codewindow.cpp" />
     <ClCompile Include="src\configfile.cpp" />
     <ClCompile Include="src\console.cpp" />
@@ -149,6 +152,7 @@
     <ClCompile Include="src\strmanip.cpp" />
     <ClCompile Include="src\texman.cpp" />
     <ClCompile Include="src\textualPanel.cpp" />
+    <ClCompile Include="src\textualView.cpp" />
     <ClCompile Include="src\thread.cpp" />
     <ClCompile Include="src\token.cpp" />
     <ClCompile Include="src\waiting.cpp" />
@@ -157,6 +161,25 @@
     <ResourceCompile Include="Danimator.rc" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="icons\beta2\frame_add.png" />
+    <Image Include="icons\beta2\frame_del.png" />
+    <Image Include="icons\beta2\frame_insert.png" />
+    <Image Include="icons\beta2\layer_add.png" />
+    <Image Include="icons\beta2\layer_del.png" />
+    <Image Include="icons\beta2\layer_down.png" />
+    <Image Include="icons\beta2\layer_up.png" />
+    <Image Include="icons\beta2\offset_bake.png" />
+    <Image Include="icons\beta2\offset_clear.png" />
+    <Image Include="icons\beta2\offset_frame_selection.png" />
+    <Image Include="icons\beta2\offset_tic.png" />
+    <Image Include="icons\beta2\sound_apply.png" />
+    <Image Include="icons\beta2\sprite_apply.png" />
+    <Image Include="icons\beta2\tex_apply.png" />
+    <Image Include="icons\beta2\tex_discard.png" />
+    <Image Include="icons\beta2\tx_export.png" />
+    <Image Include="icons\beta2\tx_import.png" />
+    <Image Include="icons\beta2\tx_sprite_new.png" />
+    <Image Include="icons\beta2\tx_view.png" />
     <Image Include="icons\frame_bk.png" />
     <Image Include="icons\frame_fwd.png" />
     <Image Include="icons\play.png" />

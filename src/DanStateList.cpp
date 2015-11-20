@@ -2,6 +2,7 @@
 #include "animator.h"
 #include "DanList.h"
 #include "DanStateList.h"
+#include "textualPanel.h"
 #include "mainFrame.h"
 
 // such coupling, many bad, wow

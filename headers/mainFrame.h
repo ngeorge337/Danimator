@@ -152,6 +152,8 @@ public:
 
 	DanCode *codeView;
 
+	TextualPanel *textualPanel;
+
 	bool playingMode;
 	bool saved;
 	bool inStartup;

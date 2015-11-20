@@ -2,6 +2,7 @@
 #include "animator.h"
 #include "DanList.h"
 #include "DanStateList.h"
+#include "textualPanel.h"
 #include "codewindow.h"
 #include "mainFrame.h"
 

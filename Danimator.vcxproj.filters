@@ -131,6 +131,12 @@
     <ClInclude Include="headers\DanStateList.h">
       <Filter>Controls</Filter>
     </ClInclude>
+    <ClInclude Include="headers\textualView.h">
+      <Filter>GUI\Textures</Filter>
+    </ClInclude>
+    <ClInclude Include="headers\CheckedListCtrl.h">
+      <Filter>Controls</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\animator.cpp">
@@ -214,6 +220,12 @@
     <ClCompile Include="src\DanStateList.cpp">
       <Filter>Controls</Filter>
     </ClCompile>
+    <ClCompile Include="src\textualView.cpp">
+      <Filter>GUI\Textures</Filter>
+    </ClCompile>
+    <ClCompile Include="src\CheckedListCtrl.cpp">
+      <Filter>Controls</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Danimator.rc">
@@ -270,6 +282,63 @@
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="icons\v_code.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="icons\beta2\frame_add.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="icons\beta2\frame_del.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="icons\beta2\frame_insert.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="icons\beta2\layer_add.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="icons\beta2\layer_del.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="icons\beta2\layer_down.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="icons\beta2\layer_up.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="icons\beta2\offset_bake.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="icons\beta2\offset_clear.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="icons\beta2\offset_frame_selection.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="icons\beta2\offset_tic.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="icons\beta2\sound_apply.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="icons\beta2\sprite_apply.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="icons\beta2\tex_apply.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="icons\beta2\tex_discard.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="icons\beta2\tx_export.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="icons\beta2\tx_import.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="icons\beta2\tx_sprite_new.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="icons\beta2\tx_view.png">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

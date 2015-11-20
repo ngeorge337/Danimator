@@ -11,25 +11,51 @@ public:
 
 	int GetZoomLevel() const { return m_zoomlevel; }
 
+	sf::Vector2f GetCanvasMousePosition();
+
 	static float m_zoom;
 	static int m_zoomlevel;
 
-private:
+protected:
 
 	DECLARE_EVENT_TABLE()
 
 	sf::RenderTexture *rt;
 	sf::Sprite renderSprite;
 
+	sf::Clock engineClock;
+
+	double t;
+	const double dt = 0.01;
+	double frameTime;
+	bool runOnce;
+
+	double currentTime;
+	int tickTime;
+	double accumulator;
+	float interpolation;
+
+	bool recreate = true;
+
+	bool capturemode;
+	bool allowCapture;
+	bool isCapturing;
+	sf::Vector2i lastPos;
+	sf::RectangleShape outlineRect;
+
 
 	virtual void OnUpdate();
 
-	void OnResize(wxSizeEvent& event);
-	void OnIdle(wxIdleEvent&);
-	void OnPaint(wxPaintEvent&);
-	void OnEraseBackground(wxEraseEvent&);
-	void OnLeftMouseDown(wxMouseEvent& event);
-	void OnLeftMouseUp(wxMouseEvent& event);
-	void OnScrollWheel(wxMouseEvent& event);
-	void OnLeaveWindow(wxMouseEvent& event);
+	virtual void OnResize(wxSizeEvent& event);
+	virtual void OnIdle(wxIdleEvent&);
+	virtual void OnPaint(wxPaintEvent&);
+	virtual void OnEraseBackground(wxEraseEvent&);
+	virtual void OnLeftMouseDown(wxMouseEvent& event);
+	virtual void OnLeftMouseUp(wxMouseEvent& event);
+	virtual void OnScrollWheel(wxMouseEvent& event);
+	virtual void OnLeaveWindow(wxMouseEvent& event);
+
+private:
+	sf::RectangleShape hudRect;
+	sf::RectangleShape crosshairRects[4];
 };

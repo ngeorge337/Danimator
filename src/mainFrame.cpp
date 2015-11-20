@@ -2,6 +2,7 @@
 #include "animator.h"
 #include "DanList.h"
 #include "DanStateList.h"
+#include "textualPanel.h"
 #include "mainFrame.h"
 #include "codewindow.h"
 #include "preferences.h"
@@ -11,6 +12,8 @@
 DanFrame::DanFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	: wxFrame(NULL, wxID_ANY, title, pos, size), playingMode(false), playFrame(0), saved(true), projectName(""), inStartup(true), inModal(false)
 {
+	wxBoxSizer *frameSizer = new wxBoxSizer(wxVERTICAL);
+
 	statusTimer = new wxTimer(this, ID_STATUS_TIMER);
 	//statusTimer->Start(5000);
 
@@ -38,9 +41,18 @@ DanFrame::DanFrame(const wxString& title, const wxPoint& pos, const wxSize& size
 	DanSizer->AddGrowableRow(0, 1);
 	DanPanel->SetSizerAndFit(DanSizer);
 
-	SetStartupMode(true);
+	textualPanel = new TextualPanel(this);
 
-	//DanPanel->Hide();
+	frameSizer->Add(DanPanel, 1, wxEXPAND);
+	frameSizer->Add(textualPanel, 1, wxEXPAND);
+	textualPanel->Hide();
+	this->SetSizerAndFit(frameSizer);
+	this->Layout();
+
+	DanPanel->Hide();
+	textualPanel->Show();
+
+	SetStartupMode(true);
 
 	CenterOnScreen();
 }

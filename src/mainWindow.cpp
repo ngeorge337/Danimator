@@ -1,5 +1,6 @@
 #include "libs.h"
 #include "animator.h"
+#include "textualPanel.h"
 #include "mainFrame.h"
 #include "mainWindow.h"
 
