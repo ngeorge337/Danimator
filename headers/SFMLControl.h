@@ -11,7 +11,7 @@ public:
 
 	int GetZoomLevel() const { return m_zoomlevel; }
 
-	sf::Vector2f GetCanvasMousePosition();
+	virtual sf::Vector2f GetCanvasMousePosition();
 
 	static float m_zoom;
 	static int m_zoomlevel;

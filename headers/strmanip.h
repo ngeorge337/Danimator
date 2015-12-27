@@ -20,6 +20,7 @@ std::string GetStringDirectory(std::string &str);
 std::string StripStringFilename(std::string &str);
 std::string GetStringFilename(std::string &str);
 std::string StripOuterQuotes(std::string &str);
+std::string RemoveWhiteSpace(const std::string &str);
 bool HasExtension(std::string &str);
 bool HasDirectory(std::string &str);
 std::string FormatString(std::string pmsg, ...);

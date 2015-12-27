@@ -137,6 +137,7 @@ wxControl(Parent, Id, Position, Size, Style)
 
 void wxSFMLCanvas::OnUpdate()
 {
+	setActive(true);
 	bool stencil = theFrame->stencilCheckBox->GetValue();
 
 	if(!runOnce)
@@ -175,7 +176,7 @@ void wxSFMLCanvas::OnUpdate()
 		t += dt;
 	}
 
-	if(theFrame->playingMode) theFrame->timelineSlider->SetValue(theFrame->GetAnimator().GetCurrentState()->frameOffset + 1);
+	if(theFrame->playingMode && theFrame->GetAnimator().GetCurrentState() != nullptr) theFrame->timelineSlider->SetValue(theFrame->GetAnimator().GetCurrentState()->frameOffset + 1);
 
 	this->setView(Camera::GetCamera());
 	clear(sf::Color::Black);
@@ -201,7 +202,7 @@ void wxSFMLCanvas::OnUpdate()
 
 	if(theFrame->GetAnimator().GetCurrentState() != nullptr && theFrame->GetAnimator().GetCurrentState()->m_frames.size() > 0 && !theFrame->playingMode)
 	{
-		if(this->GetScreenRect().Contains(wxGetMousePosition()))
+		if(this->GetScreenRect().Contains(wxGetMousePosition()) && !theFrame->inModal)
 		{
 			if(isCapturing || theFrame->GetAnimator().GetCurrentState()->GetCurrentFrame().sprite.getGlobalBounds().contains(pos))
 			{

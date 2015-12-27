@@ -39,23 +39,25 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <LibraryPath>./dependencies/SFML/lib;./dependencies/freetype/lib;./dependencies/zlib;./dependencies/jpeg;./dependencies/sndfile;./dependencies/OpenAL/libs/Win32;./dependencies/glew/lib;./dependencies/wxWidgets/lib/vc_lib;$(LibraryPath)</LibraryPath>
+    <LibraryPath>./dependencies/SFML/lib;./dependencies/freetype/lib;./dependencies/zlib;./dependencies/jpeg;./dependencies/sndfile;./dependencies/OpenAL/libs/Win32;./dependencies/glew/lib;./dependencies/wxWidgets/lib/vc_lib;./dependencies/ImageMagick/lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <LibraryPath>./dependencies/SFML/lib;./dependencies/freetype/lib;./dependencies/zlib;./dependencies/jpeg;./dependencies/sndfile;./dependencies/OpenAL/libs/Win32;./dependencies/glew/lib;./dependencies/wxWidgets/lib/vc_lib;$(LibraryPath)</LibraryPath>
+    <LibraryPath>./dependencies/SFML/lib;./dependencies/freetype/lib;./dependencies/zlib;./dependencies/jpeg;./dependencies/sndfile;./dependencies/OpenAL/libs/Win32;./dependencies/glew/lib;./dependencies/wxWidgets/lib/vc_lib;./dependencies/ImageMagick/lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>./src;./headers;./dependencies/freetype/include;./dependencies/dirent/include;./dependencies/SFML/include;./dependencies/OpenAL/include;./dependencies/glm/;./dependencies/glew/include;./dependencies/zlib/include;./dependencies/wxWidgets/include;./dependencies/wxWidgets/include/msvc;./dependencies/wxWidgets/bitmaps</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>GLEW_STATIC;SFML_STATIC;_CRT_SECURE_NO_WARNINGS;WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>./src;./headers;./dependencies/freetype/include;./dependencies/dirent/include;./dependencies/SFML/include;./dependencies/OpenAL/include;./dependencies/glm/;./dependencies/glew/include;./dependencies/zlib/include;./dependencies/wxWidgets/include;./dependencies/wxWidgets/include/msvc;./dependencies/wxWidgets/bitmaps;./dependencies/ImageMagick/include</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>GLEW_STATIC;STATIC_MAGICK;SFML_STATIC;_LIB;_CRT_SECURE_NO_WARNINGS;WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
-      <AdditionalDependencies>winmm.lib;zlibd.lib;jpeg.lib;sndfile.lib;freetype-d.lib;openal32.lib;opengl32.lib;glew32sd.lib;sfml-main-d.lib;sfml-system-s-d.lib;sfml-window-s-d.lib;sfml-network-s-d.lib;sfml-audio-s-d.lib;sfml-graphics-s-d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>winmm.lib;zlibd.lib;sndfile.lib;freetype-d.lib;openal32.lib;opengl32.lib;glew32sd.lib;sfml-main-d.lib;sfml-system-s-d.lib;sfml-window-s-d.lib;sfml-network-s-d.lib;sfml-audio-s-d.lib;sfml-graphics-s-d.lib;CORE_DB_magick_.lib;CORE_DB_Magick++_.lib;CORE_DB_wand_.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <IgnoreSpecificDefaultLibraries>
+      </IgnoreSpecificDefaultLibraries>
     </Link>
     <PostBuildEvent>
       <Command>xcopy "$(OutDir)$(TargetName)$(TargetExt)" "$(OutDir)\..\bin\" /q /y</Command>
@@ -71,15 +73,17 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>./src;./headers;./dependencies/freetype/include;./dependencies/dirent/include;./dependencies/SFML/include;./dependencies/OpenAL/include;./dependencies/glm/;./dependencies/glew/include;./dependencies/zlib/include;./dependencies/wxWidgets/include;./dependencies/wxWidgets/include/msvc;./dependencies/wxWidgets/bitmaps</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>GLEW_STATIC;SFML_STATIC;_CRT_SECURE_NO_WARNINGS;WIN32;_NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>./src;./headers;./dependencies/freetype/include;./dependencies/dirent/include;./dependencies/SFML/include;./dependencies/OpenAL/include;./dependencies/glm/;./dependencies/glew/include;./dependencies/zlib/include;./dependencies/wxWidgets/include;./dependencies/wxWidgets/include/msvc;./dependencies/wxWidgets/bitmaps;./dependencies/ImageMagick/include</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>GLEW_STATIC;STATIC_MAGICK;SFML_STATIC;_LIB;_CRT_SECURE_NO_WARNINGS;WIN32;_NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>winmm.lib;zlib.lib;jpeg.lib;sndfile.lib;freetype.lib;openal32.lib;opengl32.lib;glew32s.lib;sfml-main.lib;sfml-system-s.lib;sfml-window-s.lib;sfml-network-s.lib;sfml-audio-s.lib;sfml-graphics-s.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>winmm.lib;zlib.lib;sndfile.lib;freetype.lib;openal32.lib;opengl32.lib;glew32s.lib;sfml-main.lib;sfml-system-s.lib;sfml-window-s.lib;sfml-network-s.lib;sfml-audio-s.lib;sfml-graphics-s.lib;CORE_RL_magick_.lib;CORE_RL_Magick++_.lib;CORE_RL_wand_.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Windows</SubSystem>
+      <IgnoreSpecificDefaultLibraries>
+      </IgnoreSpecificDefaultLibraries>
     </Link>
     <PostBuildEvent>
       <Command>xcopy "$(OutDir)$(TargetName)$(TargetExt)" "$(OutDir)\..\bin\" /q /y</Command>
@@ -90,14 +94,17 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="headers\actionmanager.h" />
+    <ClInclude Include="headers\alert.h" />
     <ClInclude Include="headers\animator.h" />
     <ClInclude Include="headers\audio.h" />
+    <ClInclude Include="headers\batchaction.h" />
     <ClInclude Include="headers\bimap.h" />
     <ClInclude Include="headers\camera.h" />
     <ClInclude Include="headers\ccmd.h" />
     <ClInclude Include="headers\CheckedListCtrl.h" />
     <ClInclude Include="headers\clamped.h" />
     <ClInclude Include="headers\codewindow.h" />
+    <ClInclude Include="headers\compositetexture.h" />
     <ClInclude Include="headers\configfile.h" />
     <ClInclude Include="headers\console.h" />
     <ClInclude Include="headers\cvar.h" />
@@ -113,8 +120,10 @@
     <ClInclude Include="headers\preferences.h" />
     <ClInclude Include="headers\random.h" />
     <ClInclude Include="headers\resrcman.h" />
+    <ClInclude Include="headers\serializer.h" />
     <ClInclude Include="headers\SFMLControl.h" />
     <ClInclude Include="headers\soundman.h" />
+    <ClInclude Include="headers\SpritePreview.h" />
     <ClInclude Include="headers\static.h" />
     <ClInclude Include="headers\strmanip.h" />
     <ClInclude Include="headers\texman.h" />
@@ -130,10 +139,12 @@
     <ClCompile Include="src\actionmanager.cpp" />
     <ClCompile Include="src\animator.cpp" />
     <ClCompile Include="src\audio.cpp" />
+    <ClCompile Include="src\batchaction.cpp" />
     <ClCompile Include="src\camera.cpp" />
     <ClCompile Include="src\ccmd.cpp" />
     <ClCompile Include="src\CheckedListCtrl.cpp" />
     <ClCompile Include="src\codewindow.cpp" />
+    <ClCompile Include="src\compositetexture.cpp" />
     <ClCompile Include="src\configfile.cpp" />
     <ClCompile Include="src\console.cpp" />
     <ClCompile Include="src\cvar.cpp" />
@@ -147,10 +158,15 @@
     <ClCompile Include="src\mainFrameEvents.cpp" />
     <ClCompile Include="src\mainWindow.cpp" />
     <ClCompile Include="src\preferences.cpp" />
+    <ClCompile Include="src\projectfile.cpp" />
+    <ClCompile Include="src\projectfileOld.cpp" />
     <ClCompile Include="src\SFMLControl.cpp" />
     <ClCompile Include="src\soundman.cpp" />
+    <ClCompile Include="src\SpritePreview.cpp" />
     <ClCompile Include="src\strmanip.cpp" />
     <ClCompile Include="src\texman.cpp" />
+    <ClCompile Include="src\textualCreation.cpp" />
+    <ClCompile Include="src\textualEvents.cpp" />
     <ClCompile Include="src\textualPanel.cpp" />
     <ClCompile Include="src\textualView.cpp" />
     <ClCompile Include="src\thread.cpp" />
@@ -161,13 +177,17 @@
     <ResourceCompile Include="Danimator.rc" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="icons\beta2\app.png" />
+    <Image Include="icons\beta2\crop_t.png" />
     <Image Include="icons\beta2\frame_add.png" />
     <Image Include="icons\beta2\frame_del.png" />
     <Image Include="icons\beta2\frame_insert.png" />
+    <Image Include="icons\beta2\icon2.ico" />
     <Image Include="icons\beta2\layer_add.png" />
     <Image Include="icons\beta2\layer_del.png" />
     <Image Include="icons\beta2\layer_down.png" />
     <Image Include="icons\beta2\layer_up.png" />
+    <Image Include="icons\beta2\myicon.ico" />
     <Image Include="icons\beta2\offset_bake.png" />
     <Image Include="icons\beta2\offset_clear.png" />
     <Image Include="icons\beta2\offset_frame_selection.png" />

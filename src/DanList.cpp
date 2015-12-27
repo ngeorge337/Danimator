@@ -76,6 +76,7 @@ long DanList::DanPushFront(wxString text)
 		m_listItems.resize(idx + 1);
 
 	rowData_t row;
+	row.m_owningStateName = text.ToStdString();
 	row.m_row.push_back(info);
 
 	m_listItems.insert(m_listItems.begin(), row);
@@ -96,6 +97,7 @@ long DanList::DanPushBack(wxString text)
 		m_listItems.resize(idx + 1);
 
 	rowData_t row;
+	row.m_owningStateName = text.ToStdString();
 	row.m_row.push_back(info);
 
 	m_listItems[idx] = row;
@@ -116,6 +118,7 @@ long DanList::DanInsert(long index, wxString text)
 		m_listItems.resize(idx + 1);
 
 	rowData_t row;
+	row.m_owningStateName = text.ToStdString();
 	row.m_row.push_back(info);
 
 	auto it = m_listItems.begin();
@@ -131,14 +134,11 @@ DanList::DanList(wxWindow *parent, wxWindowID id, const wxPoint &pos /*= wxDefau
 
 }
 
-void rowData_t::SetColumnOfThisRow(int col, wxListItem item)
+void DanList::ChangeOwner(wxString oldName, wxString newName)
 {
-	if(m_row.size() < col + 1)
-		m_row.resize(col + 1);
-	m_row[col] = item;
-}
-
-std::vector<wxListItem> & rowData_t::GetRowData()
-{
-	return m_row;
+	for(int i = 0; i < m_listItems.size(); ++i)
+	{
+		if(m_listItems[i].m_owningStateName == oldName.ToStdString())
+			m_listItems[i].m_owningStateName = newName.ToStdString();
+	}
 }

@@ -32,7 +32,8 @@ bool FState_t::Tick( float t )
 		justEntered = false;
 		if(m_frames[frameOffset].hasSound && !m_frames[frameOffset].soundName.empty())
 		{
-			Audio::PlaySound(m_frames[frameOffset].soundName, CHAN_AUTO, false);
+			if(theFrame->allowSoundCheckBox->GetValue() == true)
+				Audio::PlaySound(m_frames[frameOffset].soundName, CHAN_AUTO, false);
 		}
 	}
 	
@@ -86,7 +87,7 @@ void FState_t::Reset( int offset )
 {
 	frameOffset = offset;
 	if(frameOffset >= m_frames.size())
-		frameOffset = 0;
+		frameOffset = m_frames.size() - 1;
 	m_ticks = 0;
 	justEntered = true;
 }
@@ -209,6 +210,18 @@ void FState_t::RemoveFrame(int pos /*= -1*/)
 		pos = frameOffset;
 	m_frames.erase(m_frames.begin() + pos);
 	//frameOffset--;
+}
+
+Frame_t & FState_t::InsertEmptyFrame(int pos /*= -1*/)
+{
+	if(m_frames.empty())
+		return AddEmptyFrame();
+	if(pos <= -1)
+		pos = frameOffset;
+	auto it = m_frames.begin();
+	std::advance(it, pos + 1);
+	m_frames.insert(it, Frame_t());
+	return m_frames[pos];
 }
 
 void Animator::Tick( float t )
@@ -364,4 +377,83 @@ void Animator::draw(sf::RenderTarget& target, sf::RenderStates states) const
 
 	//m_currentState->GetCurrentFrame().sprite.setPosition(sf::Vector2f(0, 0));
 	target.draw(m_currentState->GetCurrentFrame().sprite);
+}
+
+// This updates any references to texture images we might have
+// necessary for loading new images (overwriting old ones), or
+// for updating sprites with newer composite texture output
+void Animator::EnsureSpritePointers()
+{
+	for(auto it = m_validStates.begin(); it != m_validStates.end(); ++it)
+	{
+		for(int i = 0; i < it->second.m_frames.size(); i++)
+		{
+			it->second.m_frames[i].sprite.setTexture(*Locator::GetTextureManager()->GetTexture(it->second.m_frames[i].spriteName), true);
+		}
+	}
+}
+
+void Animator::RenameState(const std::string &name, const std::string &newName)
+{
+	if(m_validStates.find(name) == m_validStates.end())
+		return;
+
+	bool setme = false;
+	int fs = GetCurrentState()->GetOffset();
+	if(CompNoCase(m_currentState->name, name))
+	{
+		m_currentState = nullptr;
+		setme = true;
+	}
+
+	m_validStates[newName] = FState_t(m_validStates[name]);
+	m_validStates[newName].name = newName;
+	if(setme)
+		SetState(newName, fs);
+	m_validStates.erase(name);
+}
+
+void Animator::DuplicateState(const std::string &name, const std::string &newName)
+{
+	if(m_validStates.find(name) == m_validStates.end())
+		return;
+
+	m_validStates[newName] = FState_t(m_validStates[name]);
+	m_validStates[newName].name = newName;
+}
+
+void Animator::SetNull()
+{
+	m_currentState = nullptr;
+}
+
+void Animator::UpdateSpriteNames(const std::string &oldname, const std::string &newname)
+{
+	for(auto it = m_validStates.begin(); it != m_validStates.end(); ++it)
+	{
+		for(int i = 0; i < it->second.m_frames.size(); i++)
+		{
+			it->second.m_frames[i].sprite.setTexture(*Locator::GetTextureManager()->GetTexture(newname), true);
+			it->second.m_frames[i].spriteName = newname;
+		}
+	}
+}
+
+void Animator::UpdateSoundNames(const std::string &oldname, const std::string &newname)
+{
+	for(auto it = m_validStates.begin(); it != m_validStates.end(); ++it)
+	{
+		for(int i = 0; i < it->second.m_frames.size(); i++)
+		{
+			if(it->second.m_frames[i].hasSound)
+				if(it->second.m_frames[i].soundName == oldname)
+					it->second.m_frames[i].soundName = newname;
+		}
+	}
+}
+
+Frame_t::Frame_t() : duration(1.f), tics(1), sprite(sf::Sprite()), spriteName("TNT1A0"), soundName(""), hasSound(false)
+{
+	sprite.setTexture(*Locator::GetTextureManager()->GetTexture("TNT1A0"), true);
+	duration = TICS(1);
 }

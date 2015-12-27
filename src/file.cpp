@@ -693,7 +693,7 @@ std::string FileSystem::GetFileLocationRecursive(std::string name, int flags)
 	return fulldir;
 }
 
-FILE *FileSystem::CreateFile(std::string name, eFileMode _mode)
+FILE *FileSystem::CreateFileLegacy(std::string name, eFileMode _mode)
 {
 	std::string mode;
 	std::string target;
@@ -738,6 +738,48 @@ FILE *FileSystem::CreateFile(std::string name, eFileMode _mode)
 	file = fopen(target.c_str(), mode.c_str());
 
 	if(file == NULL)
+	{
+		Console->LogMessage("FileSystem::CreateFile() -- Cannot create file '%s'", target);
+		return nullptr;
+	}
+
+	return file;
+}
+
+File FileSystem::CreateNewFile(std::string name, eFileMode _mode)
+{
+	std::string mode;
+	std::string target;
+	if(!IsDirOpen())
+	{
+		if(!OpenDir("./"))
+		{
+			Console->LogMessage("FileSystem::CreateFile() -- No current directory open");
+			return nullptr;
+		}
+	}
+	File file;
+	target = dirnamecopy + name;
+
+	assert(!(_mode == FM_APPEND || _mode == FM_APPEND_WRITE));
+
+	switch(_mode)
+	{
+	case FM_WRITE:
+		mode = "w";
+		break;
+
+	case FM_WRITE_BINARY:
+		mode = "wb";
+		break;
+
+	default:
+		Console->LogMessage("FileSystem::CreateFile() -- Invalid writing mode");
+		return nullptr;
+		break;
+	}
+
+	if(!file.Create(target, _mode))
 	{
 		Console->LogMessage("FileSystem::CreateFile() -- Cannot create file '%s'", target);
 		return nullptr;
@@ -850,7 +892,7 @@ bool FileSystem::FileExists( std::string name, int flags /*= 0*/ )
 
 File::File(std::string name)
 {
-	src = nullptr;
+	src = NULL;
 	//fs = &rfs;
 	//fs = Engine->filesystem;
 	fname = name;
@@ -868,7 +910,7 @@ File::File(std::string name)
 
 File::File()
 {
-	src = nullptr;
+	src = NULL;
 	//fs = Engine->filesystem;
 }
 
@@ -888,7 +930,7 @@ bool File::Open( std::string name, eFileMode md /*= FM_READ*/ )
 	return true;
 }
 
-std::string File::ReadFile()
+std::string File::ReadText()
 {
 	if(!IsOpen())
 		return "";
@@ -918,4 +960,387 @@ std::string File::ReadFile()
 
 	delete[] buffer;
 	return r;
+}
+
+int File::ReadBytes(void *destBuf, size_t byteCount)
+{
+	if(!IsOpen())
+		return 0;
+
+	if(!(mode == FM_READ || mode == FM_READ_BINARY))
+		return 0;
+
+	int nRead = fread(destBuf, sizeof(unsigned char), byteCount, src);
+	
+
+	return nRead;
+}
+
+void File::WriteBytes(const void *iData, size_t length)
+{
+	if(!IsOpen())
+		return;
+
+	if(!(mode == FM_WRITE || mode == FM_WRITE_BINARY))
+		return;
+
+	fwrite(iData, sizeof(unsigned char), length, src);
+}
+
+bool File::Create(const std::string &pathName, eFileMode md)
+{
+	mode = md;
+	std::string fmode;
+	if(md == FM_WRITE) fmode = "w";
+	else if(md == FM_WRITE_BINARY) fmode = "wb";
+	else if(md == FM_READ) fmode = "r";
+	else if(md == FM_READ_BINARY) fmode = "rb";
+	src = fopen(pathName.c_str(), fmode.c_str());
+	fpath = pathName;
+	fpath = StripStringFilename(fpath);
+	std::string fullFilename = pathName;
+	fname = StripStringDirectory(fullFilename);
+	if(src == nullptr)
+	{
+		Console->LogMessage("Unable to open file '%s'", pathName);
+		return false;
+	}
+
+	return true;
+}
+
+File & File::operator>>(FState_t &pData)
+{
+	operator>>(pData.name);
+	operator>>(pData.ending);
+	if(pData.ending == END_GOTO)
+		operator>>(pData.gotoLabel);
+	int frameCount;
+	operator>>(frameCount);
+	if(frameCount > 0)
+	{
+		for(int i = 0; i < frameCount; ++i)
+		{
+			Frame_t frame;
+			operator>>(frame);
+			pData.m_frames.push_back(frame);
+		}
+	}
+	return *this;
+}
+
+File & File::operator>>(Frame_t &pData)
+{
+	operator>>(pData.spriteName);
+
+	sf::Vector2f tempPos;
+	operator>>(tempPos);
+	pData.sprite.setPosition(tempPos);
+
+	sf::Color tempColor;
+	operator>>(tempColor);
+	pData.sprite.setColor(tempColor);
+
+	operator>>(pData.tics);
+	operator>>(pData.duration);
+	operator>>(pData.hasSound);
+	if(pData.hasSound)
+		operator>>(pData.soundName);
+	return *this;
+}
+
+File & File::operator>>(sf::SoundBuffer &pData)
+{
+	int sz;
+	int channelCount;
+	int sampleRate;
+	int sampleCount;
+	sf::Int16 *samples = nullptr;
+	ReadBytes(&sz, sizeof(std::size_t));
+	ReadBytes(&channelCount, sizeof(int));
+	ReadBytes(&sampleRate, sizeof(int));
+	ReadBytes(&sampleCount, sizeof(int));
+	samples = new sf::Int16[sz];
+	ReadBytes(samples, sz);
+	pData.loadFromSamples(samples, sampleCount, channelCount, sampleRate);
+	delete[] samples;
+	return *this;
+}
+
+File & File::operator>>(CompositeLayer_t &pData)
+{
+	operator>>(pData.layerName);
+	operator>>(pData.spriteName);
+
+	sf::Vector2f tempPos;
+	operator>>(tempPos);
+	pData.spr.setPosition(tempPos);
+
+	sf::Color tempColor;
+	operator>>(tempColor);
+	pData.spr.setColor(tempColor);
+
+	operator>>(pData.isVisible);
+	operator>>(pData.renderStyle);
+	operator>>(pData.opacityValue);
+	operator>>(pData.rotValue);
+	operator>>(pData.flipX);
+	operator>>(pData.flipY);
+	return *this;
+}
+
+File & File::operator>>(sf::Texture &pData)
+{
+	float imgW;
+	float imgH;
+	sf::Uint8 *imgData = nullptr;
+	ReadBytes(&imgW, sizeof(int));
+	ReadBytes(&imgH, sizeof(int));
+	int len = imgW * imgH * 4;
+	imgData = new sf::Uint8[len];
+	ReadBytes(imgData, sizeof(sf::Uint8) * len);
+
+	sf::Image image = sf::Image();
+	image.create(imgW, imgH, imgData);
+	pData.loadFromImage(image);
+
+	delete[] imgData;
+	return *this;
+}
+
+File & File::operator>>(sf::Uint16 &pData)
+{
+	ReadBytes(&pData, sizeof(sf::Uint16));
+	return *this;
+}
+
+/*
+File & File::operator>>(sf::Uint8 &pData)
+{
+	ReadBytes(&pData, sizeof(sf::Uint8));
+	return *this;
+}
+*/
+
+File & File::operator>>(sf::Color &pData)
+{
+	BYTE outR;
+	BYTE outG;
+	BYTE outB;
+	BYTE outA;
+	ReadBytes(&outR, sizeof(BYTE));
+	ReadBytes(&outG, sizeof(BYTE));
+	ReadBytes(&outB, sizeof(BYTE));
+	ReadBytes(&outA, sizeof(BYTE));
+	pData = sf::Color(outR, outG, outB, outA);
+	return *this;
+}
+
+File & File::operator>>(sf::Vector2i &pData)
+{
+	ReadBytes(&pData.x, sizeof(int));
+	ReadBytes(&pData.y, sizeof(int));
+	return *this;
+}
+
+File & File::operator>>(sf::Vector2f &pData)
+{
+	ReadBytes(&pData.x, sizeof(float));
+	ReadBytes(&pData.y, sizeof(float));
+	return *this;
+}
+
+File & File::operator>>(float &pData)
+{
+	ReadBytes(&pData, sizeof(float));
+	return *this;
+}
+
+File & File::operator>>(bool &pData)
+{
+	ReadBytes(&pData, sizeof(bool));
+	return *this;
+}
+
+File & File::operator>>(BYTE &pData)
+{
+	ReadBytes(&pData, sizeof(BYTE));
+	return *this;
+}
+
+File & File::operator>>(int &pData)
+{
+	ReadBytes(&pData, sizeof(int));
+	return *this;
+}
+
+File & File::operator>>(std::string &pData)
+{
+	int len;
+	ReadBytes(&len, sizeof(int));
+
+	if(len <= 0)
+		return *this;
+
+	char *str = new char[len + 1]();
+	ReadBytes(str, len);
+	str[len] = '\0';
+	pData = std::string(str);
+	delete[] str;
+	return *this;
+}
+
+File & File::operator<<(const FState_t &pData)
+{
+	operator<<(pData.name);
+	operator<<(pData.ending);
+	if(pData.ending == END_GOTO)
+		operator<<(pData.gotoLabel);
+	if(!pData.m_frames.empty())
+	{
+		operator<<(int(pData.m_frames.size()));
+		for(int i = 0; i < pData.m_frames.size(); ++i)
+			operator<<(pData.m_frames[i]);
+	}
+	return *this;
+}
+
+File & File::operator<<(const Frame_t &pData)
+{
+	operator<<(pData.spriteName);
+	operator<<(pData.sprite.getPosition());
+	operator<<(pData.sprite.getColor());
+	operator<<(pData.tics);
+	operator<<(pData.duration);
+	operator<<(pData.hasSound);
+	if(pData.hasSound)
+		operator<<(pData.soundName);
+	return *this;
+}
+
+File & File::operator<<(const sf::SoundBuffer &pData)
+{
+	int sz = sizeof(sf::Int16) * pData.getSampleCount();
+	WriteBytes(&sz, sizeof(std::size_t));
+	int len = pData.getChannelCount();
+	WriteBytes(&len, sizeof(int));
+	len = pData.getSampleRate();
+	WriteBytes(&len, sizeof(int));
+	len = pData.getSampleCount();
+	WriteBytes(&len, sizeof(int));
+	const sf::Int16 *samples = pData.getSamples();
+	WriteBytes(samples, sz);
+	return *this;
+}
+
+File & File::operator<<(const CompositeLayer_t &pData)
+{
+	operator<<(pData.layerName);
+	operator<<(pData.spriteName);
+	operator<<(pData.spr.getPosition());
+	operator<<(pData.spr.getColor());
+	operator<<(pData.isVisible);
+	operator<<(pData.renderStyle);
+	operator<<(pData.opacityValue);
+	operator<<(pData.rotValue);
+	operator<<(pData.flipX);
+	operator<<(pData.flipY);
+	return *this;
+}
+
+File & File::operator<<(const sf::Texture &pData)
+{
+	sf::Image tempimg = sf::Image();
+	tempimg = pData.copyToImage();
+	float imgW = pData.getSize().x;
+	float imgH = pData.getSize().y;
+	const sf::Uint8 *imgData = tempimg.getPixelsPtr();
+	int len = pData.getSize().x * pData.getSize().y * 4;
+	WriteBytes(&imgW, sizeof(int));
+	WriteBytes(&imgH, sizeof(int));
+	WriteBytes(imgData, sizeof(sf::Uint8) * len);
+	return *this;
+}
+
+File & File::operator<<(const sf::Uint16 &pData)
+{
+	WriteBytes(&pData, sizeof(sf::Uint16));
+	return *this;
+}
+
+/*
+File & File::operator<<(const sf::Uint8 &pData)
+{
+	WriteBytes(&pData, sizeof(sf::Uint8));
+	return *this;
+}
+*/
+
+File & File::operator<<(const sf::Color &pData)
+{
+	BYTE outR = pData.r;
+	BYTE outG = pData.g;
+	BYTE outB = pData.b;
+	BYTE outA = pData.a;
+	WriteBytes(&outR, sizeof(BYTE));
+	WriteBytes(&outG, sizeof(BYTE));
+	WriteBytes(&outB, sizeof(BYTE));
+	WriteBytes(&outA, sizeof(BYTE));
+	return *this;
+}
+
+File & File::operator<<(const sf::Vector2i &pData)
+{
+	int outX = pData.x;
+	int outY = pData.y;
+	WriteBytes(&outX, sizeof(int));
+	WriteBytes(&outY, sizeof(int));
+	return *this;
+}
+
+File & File::operator<<(const sf::Vector2f &pData)
+{
+	float outX = pData.x;
+	float outY = pData.y;
+	WriteBytes(&outX, sizeof(float));
+	WriteBytes(&outY, sizeof(float));
+	return *this;
+}
+
+File & File::operator<<(const float &pData)
+{
+	WriteBytes(&pData, sizeof(float));
+	return *this;
+}
+
+File & File::operator<<(const bool &pData)
+{
+	WriteBytes(&pData, sizeof(bool));
+	return *this;
+}
+
+File & File::operator<<(const BYTE &pData)
+{
+	WriteBytes(&pData, sizeof(BYTE));
+	return *this;
+}
+
+File & File::operator<<(const int &pData)
+{
+	WriteBytes(&pData, sizeof(int));
+	return *this;
+}
+
+File & File::operator<<(const std::string &pData)
+{
+	int len;
+	len = pData.length();
+
+	if(len <= 0)
+		return *this;
+
+	WriteBytes(&len, sizeof(int));
+	len = sizeof(char) * len;
+	WriteBytes(pData.c_str(), len);
+	return *this;
 }

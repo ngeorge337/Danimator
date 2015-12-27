@@ -1,0 +1,86 @@
+Quickstart guide
+1) Create a state, name it (Click this: 1)
+2) Load some stuff (Drag and drop or click these: 2 3
+Sounds require an SNDINFO alias.
+3) Add or remove frames to the timeline: 4 5 6
+4) Double-click an asset to attach it to a frame, or click these: 7 8
+Repeat for all desired frames
+5) Click and drag sprites around on the viewport, or use these to fine-tune alignment: 9 10 11 12
+6) Set a frame's length: 13
+7) Look at the resulting state code: 14
+8) Modify the code's flow control: 15
+9) Right-click entries in the state manager for these options: 16
+
+Using TEXTURES:
+1) Ensure all desired graphics are loaded into project
+2) Click this, use suggested naming convention or be your own man:
+3) Use these to determine the composite image's resulting size:
+4) Add a layer by clicking this:
+5) Attach sprites to layers by double-clicking or clicking this with file selected:
+Repeat last two steps as desired
+6) Manipulate layer order with these: 
+7) Organize and duplicate your layers by right-clicking on them
+8) Click this when you're done:
+9) If you need to get back into the TEXTURES editor, right-click on your texture sprite in the file manager and click this:
+10) And click this when you're ready to generate the TEXTURES lump for your project:
+
+(Extra: You can use composite textures you define in TEXTURES as bases for new composite textures- as long as they're defined in Danimator first. Danimator will take care of the proper order for you automatically. Parsing imported TEXTURES code may come in the future.)
+
+Animator functionality:
+Stencil) This hides sprites that go past the visible boundary of the screen.
+Crosshair) Draws a crosshair in the center of the viewport to aid in offsetting frames.
+Ghosting/Ghost Frames) Draws previous frames before the currently selected frame as "ghost" frames. Aids in offsetting moving frames.
+Loop) Loop) 
+
+Settings:
+Bilinear Filtering) Avoids certain viewport rendering artifacts. Can be disabled in settings.
+
+TEXTURES functionality:
+Namespace) Refer to http://zdoom.org/wiki/TEXTURES#Texture_properties
+Color) Blend your layer's color to a specified RGB value.
+Styles) Refer to http://zdoom.org/wiki/TEXTURES#Translucency 
+As of writing, currently the only supported styles are CopyAlpha, Copy, Translucent, and Add. Modify your exported lump if you need something unsupported.
+Alpha) 
+
+CURRENT LIMITATIONS AND NOTES:
+-No traditional Flash state support yet.
+-Non-essential blending modes aren't implemented yet.
+-Danimator ignores any embedded offsets.
+
+FAQ:
+-WILL THIS HELP ME MAKE SPRITES/SOUNDS/ETC FROM SCRATCH?
+nope. you will still need to know how to use an image/sound editor and some idea of how DECORATE weapons work for that- danimator's focus is on the code and animation aspect of decorate weapons.
+if you're new and are looking to learn how to code weapons in zdoom, these two resources are a great starting point.
+http://gunlabs.blogspot.com/2011/01/tutorials.html
+http://zdoom.org/wiki/DECORATE
+
+we've also included some example wads and project files.
+
+-CAN YOU USE THIS IN OTHER SOURCE PORTS?
+danimator targets zdoom-derivative ports with some decorate support (minimum A_Offset support) and optionally, textures support. you can use this tool with GLOOME and Zandronum.
+additional source ports may or may not be supported in the future.
+
+-WHAT FORMATS CAN I USE
+danimator is built mostly on SFML, but danimator will only handle common formats ZDoom and SFML support.
+images: png, jpeg (non-progressive, library limitation), tga
+audio: wav, ogg/vorbis, flac
+
+-HOTKEYS?
+Space = play/stop animation
+Ctrl+Space = play from start
+Ctrl+S = Save
+Ctrl+N = New Project
+Ctrl+O = Open Project
+Ctrl+Z = Undo
+Ctrl+Y = Redo
+Ctrl+C = Copy frame
+Ctrl+V = Paste frame
+
+-MY OFFSETS LOOK WRONG IN-GAME BUT LOOK FINE IN THE EDITOR
+make sure the assets in your wad don't have embedded [url=http://zdoom.org/wiki/GrAb]grAb[/url] offsets if your sprites are PNGs.
+
+-THE SOUND IS WRONG/DOESN'T PLAY
+make sure your SNDINFO lump aliases match your project's aliases and are properly imported.
+
+ADVANCED OPERATION: DANIMALS ENJOYMENT GUIDE
+See attached

@@ -119,7 +119,7 @@ bool Parser::OpenFile(std::string filename, unsigned int offset, unsigned int le
 	// Open the file
 	FILE *file;
 
-	char *cfilename = new char[filename.size()+1];
+	char *cfilename = new char[filename.size()+1]();
 
 	strcpy(cfilename, filename.c_str());
 
@@ -146,7 +146,7 @@ bool Parser::OpenFile(std::string filename, unsigned int offset, unsigned int le
 	// Setup variables & allocate memory
 	filelength = length;
 	position = 0;
-	start = current = new char[filelength];
+	start = current = new char[filelength+1]();
 	line = 1;
 	t_start = 0;
 	t_end = 0;
@@ -154,6 +154,8 @@ bool Parser::OpenFile(std::string filename, unsigned int offset, unsigned int le
 	// Read the file portion
 	fseek(file, offset, SEEK_SET);
 	fread(start, filelength, length, file);
+
+	current[filelength] = '\0';
 
 	// Unsure if this is needed or will cause problems
 	// but the information should already be copied in so...
@@ -181,7 +183,7 @@ bool Parser::OpenString(std::string text, unsigned int offset, unsigned int leng
 	line = 1;
 	t_start = 0;
 	t_end = 0;
-	start = current = new char[filelength];
+	start = current = new char[filelength]();
 
 	// Copy the std::string portion
 	memcpy(start, ((char*) text.c_str()) + offset, filelength);
@@ -208,7 +210,7 @@ bool Parser::OpenBlock(scriptblock_t *block, unsigned int offset, unsigned int l
 	line = block->linestart + 1;
 	t_start = 0;
 	t_end = 0;
-	start = current = new char[filelength];
+	start = current = new char[filelength]();
 
 	// Copy the std::string portion
 	memcpy(start, ((char*) block->contents.c_str()) + offset, filelength);
@@ -237,7 +239,7 @@ bool Parser::OpenMem(const char *mem, unsigned int length, std::string source)
 	line = 1;
 	t_start = 0;
 	t_end = 0;
-	start = current = new char[filelength];
+	start = current = new char[filelength]();
 
 	// Copy the data
 	memcpy(start, mem, filelength);

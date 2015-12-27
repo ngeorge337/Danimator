@@ -7,18 +7,20 @@
 #include "codewindow.h"
 #include "preferences.h"
 
+extern DanFrame *theFrame;
+
 void DanFrame::BuildMenuBar()
 {
 	// Create our menu bar items, and add their elements
 	// FILE menu
 	menuFile = new wxMenu;
-	wxMenuItem *mNewProject = new wxMenuItem(menuFile, ID_NEWPROJECT, _T("New Project"), _T("Start a new project"));
+	wxMenuItem *mNewProject = new wxMenuItem(menuFile, ID_NEWPROJECT, _T("New Project\tCtrl-N"), _T("Start a new project"));
 	mNewProject->SetBitmap(wxArtProvider::GetBitmap(wxART_NEW, wxART_OTHER, wxSize(16, 16)));
 
-	wxMenuItem *mOpenProject = new wxMenuItem(menuFile, ID_OPENPROJECT, _T("Open Project"), _T("Open an existing project"));
+	wxMenuItem *mOpenProject = new wxMenuItem(menuFile, ID_OPENPROJECT, _T("Open Project\tCtrl-O"), _T("Open an existing project"));
 	mOpenProject->SetBitmap(wxArtProvider::GetBitmap(wxART_FILE_OPEN, wxART_OTHER, wxSize(16, 16)));
 
-	wxMenuItem *mSave = new wxMenuItem(menuFile, ID_SAVEPROJECT, _T("Save Project"), _T("Save the current project"));
+	wxMenuItem *mSave = new wxMenuItem(menuFile, ID_SAVEPROJECT, _T("Save Project\tCtrl-S"), _T("Save the current project"));
 	mSave->SetBitmap(wxArtProvider::GetBitmap(wxART_FILE_SAVE, wxART_OTHER, wxSize(16, 16)));
 
 	wxMenuItem *mSaveAs = new wxMenuItem(menuFile, ID_SAVEPROJECTAS, _T("Save Project As..."), _T("Save the current project to a new file"));
@@ -38,6 +40,36 @@ void DanFrame::BuildMenuBar()
 	menuFile->AppendSeparator();
 	menuFile->Append(wxID_EXIT);
 
+	// Edit menu
+	menuEdit = new wxMenu;
+
+	wxMenuItem *mUndo = new wxMenuItem(menuFile, ID_UNDO, _T("Undo\tCtrl-Z"), _T("Undo last editing action"));
+	mUndo->SetBitmap(wxArtProvider::GetBitmap(wxART_UNDO, wxART_OTHER, wxSize(16, 16)));
+
+	wxMenuItem *mRedo = new wxMenuItem(menuFile, ID_REDO, _T("Redo\tCtrl-Y"), _T("Redo last editing action"));
+	mRedo->SetBitmap(wxArtProvider::GetBitmap(wxART_REDO, wxART_OTHER, wxSize(16, 16)));
+
+	menuEdit->Append(mUndo);
+	menuEdit->Append(mRedo);
+
+	// Project menu (import | export)
+	menuImport = new wxMenu;
+	menuExport = new wxMenu;
+
+	wxMenuItem *mImportSndinfo = new wxMenuItem(menuFile, ID_IMPORTSNDINFO, _T("SNDINFO..."), _T("Import SNDINFO and load sound resources"));
+	wxMenuItem *mImportResources = new wxMenuItem(menuFile, ID_IMPORTRESOURCES, _T("Resources..."), _T("Import project resources from a .danres file"));
+	wxMenuItem *mExportResources = new wxMenuItem(menuFile, ID_EXPORTRESOURCES, _T("Resources..."), _T("Export a .danres Resource compilation"));
+
+	menuImport->Append(mImportResources);
+	menuImport->Append(mImportSndinfo);
+
+	menuExport->Append(mExportResources);
+
+	wxMenu *menuProject = new wxMenu;
+
+	menuProject->AppendSubMenu(menuImport, _T("Import"));
+	menuProject->AppendSubMenu(menuExport, _T("Export"));
+
 	// View menu
 	menuView = new wxMenu;
 
@@ -53,8 +85,11 @@ void DanFrame::BuildMenuBar()
 
 	// Now add the menubar and put the menus on it
 	menuBar = new wxMenuBar;
+	menuBar->SetWindowStyle(wxNO_BORDER);
 	menuBar->Append(menuFile, "&File");
+	menuBar->Append(menuEdit, "&Edit");
 	menuBar->Append(menuView, "&View");
+	menuBar->Append(menuProject, "&Project");
 	menuBar->Append(menuHelp, "&Help");
 	SetMenuBar(menuBar);
 }
@@ -67,22 +102,23 @@ void DanFrame::BuildStatesList()
 	stateButtonSizer = new wxBoxSizer(wxHORIZONTAL);
 
 	StateListCtrl = new DanStateList(DanPanel, ID_STATELIST, wxPoint(0, 0), wxSize(200, 120), wxLC_SINGLE_SEL | wxLC_REPORT | wxLC_HRULES);
+	StateListCtrl->Connect(ID_STATELIST, wxEVT_LIST_ITEM_RIGHT_CLICK, wxListEventHandler(DanFrame::OnStateContext));
 	//StateListCtrl->DeleteAllItems();
 	StateListCtrl->AppendColumn(_T("State"), wxLIST_FORMAT_LEFT, -1);
 	StateListCtrl->AppendColumn(_T("Frames"), wxLIST_FORMAT_LEFT, -1);
 	StateListCtrl->AppendColumn(_T("Tics"), wxLIST_FORMAT_LEFT, -1);
 	stateListSizer->Add(StateListCtrl, 1, wxALIGN_LEFT);
 
-	newStateButton = new wxButton(DanPanel, ID_NEWSTATE, _T("New State"), wxPoint(0, 0), wxSize(32, 32), wxBU_NOTEXT);
+	newStateButton = new wxButton(DanPanel, ID_NEWSTATE, _T(""), wxPoint(0, 0), wxSize(32, 32), wxBU_NOTEXT);
 	newStateButton->SetBitmap(wxBITMAP_PNG(State_Add));
 	newStateButton->SetToolTip(_T("New State"));
-	delStateButton = new wxButton(DanPanel, ID_DELSTATE, _T("Delete State"), wxPoint(0, 0), wxSize(32, 32), wxBU_NOTEXT);
+	delStateButton = new wxButton(DanPanel, ID_DELSTATE, _T(""), wxPoint(0, 0), wxSize(32, 32), wxBU_NOTEXT);
 	delStateButton->SetBitmap(wxBITMAP_PNG(State_Del));
 	delStateButton->SetToolTip(_T("Delete State"));
-	viewCodeButton = new wxButton(DanPanel, ID_VIEWCODE, _T("View DECORATE Code"), wxPoint(0, 0), wxSize(32, 32), wxBU_NOTEXT);
+	viewCodeButton = new wxButton(DanPanel, ID_VIEWCODE, _T(""), wxPoint(0, 0), wxSize(32, 32), wxBU_NOTEXT);
 	viewCodeButton->SetBitmap(wxBITMAP_PNG(ViewCode));
 	viewCodeButton->SetToolTip(_T("View DECORATE Code"));
-	exportCodeButton = new wxButton(DanPanel, ID_EXPORTCODE, _T("Export to DECORATE"), wxPoint(0, 0), wxSize(32, 32), wxBU_NOTEXT);
+	exportCodeButton = new wxButton(DanPanel, ID_EXPORTCODE, _T(""), wxPoint(0, 0), wxSize(32, 32), wxBU_NOTEXT);
 	exportCodeButton->SetBitmap(wxBITMAP_PNG(ExportCode));
 	exportCodeButton->SetToolTip(_T("Export to DECORATE"));
 	stateButtonSizer->Add(newStateButton);
@@ -101,39 +137,59 @@ void DanFrame::BuildResourceLists()
 	// Resources Notebook
 	ResourcesNotebook = new wxNotebook(DanPanel, wxID_ANY, wxDefaultPosition, wxSize(200, 240), wxNB_BOTTOM);
 
+
 	// SPRITES ===============================================
 	spritePageSizer = new wxFlexGridSizer(2, 1, 0, 0);
 	spriteListSizer = new wxBoxSizer(wxVERTICAL);
 	spriteButtonSizer = new wxBoxSizer(wxHORIZONTAL);
 
 
-	spritePanel = new wxPanel(ResourcesNotebook);
+	spritePanel = new wxPanel(ResourcesNotebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxNO_BORDER);
+	
+	spritePreviewer = new wxImagePanel(spritePanel, wxDefaultPosition, wxSize(200, 100));
 
 	SpritesListCtrl = new wxListView(spritePanel, ID_SELECTSPRITE, wxPoint(0, 0), wxSize(200, 200), wxLC_SINGLE_SEL | wxLC_SORT_ASCENDING | wxLC_REPORT | wxLC_VRULES);
+	SpritesListCtrl->SetDropTarget(new SpriteDropTarget);
 	SpritesListCtrl->AppendColumn(_T("Sprite"), wxLIST_FORMAT_LEFT, -1);
 	SpritesListCtrl->AppendColumn(_T("Source"), wxLIST_FORMAT_LEFT, -1);
 	SpritesListCtrl->AppendColumn(_T("Size (bytes)"), wxLIST_FORMAT_LEFT, -1);
 	SpritesListCtrl->AppendColumn(_T("Dims"), wxLIST_FORMAT_LEFT, -1);
 	SpritesListCtrl->InsertItem(0, wxString("* No Sprite (TNT1A0)"));
-	SpritesListCtrl->SetItemData(0, -9999);
+	SpritesListCtrl->SetItemData(0, CreateSortData("\0", -9999));
 	SpritesListCtrl->SetColumnWidth(0, wxLIST_AUTOSIZE);
+	spriteListSizer->Add(spritePreviewer, 0, wxALIGN_LEFT);
+	spriteListSizer->AddSpacer(2);
 	spriteListSizer->Add(SpritesListCtrl, 1, wxALIGN_LEFT);
 
-	loadSpriteButton = new wxButton(spritePanel, ID_ADDSPRITE, _T("Load Sprites..."), wxPoint(0, 0), wxSize(32, 32), wxBU_NOTEXT);
+	applySpriteButton = new wxButton(spritePanel, ID_APPLYSPRITEBTN, _T(""), wxPoint(0, 0), wxSize(32, 32), wxBU_NOTEXT);
+	applySpriteButton->SetBitmap(wxBITMAP_PNG(APPLYSPRITE));
+	applySpriteButton->SetToolTip(_T("Apply selected sprite to Frame"));
+	loadSpriteButton = new wxButton(spritePanel, ID_ADDSPRITE, _T(""), wxPoint(0, 0), wxSize(32, 32), wxBU_NOTEXT);
 	loadSpriteButton->SetBitmap(wxBITMAP_PNG(Sprite_Add));
 	loadSpriteButton->SetToolTip(_T("Load Sprites..."));
-	delSpriteButton = new wxButton(spritePanel, ID_DELSPRITE, _T("Delete Sprite"), wxPoint(0, 0), wxSize(32, 32), wxBU_NOTEXT);
+	createTexturesButton = new wxButton(spritePanel, ID_CREATETEXTURE, _T(""), wxPoint(0, 0), wxSize(32, 32), wxBU_NOTEXT);
+	createTexturesButton->SetBitmap(wxBITMAP_PNG(TEX_ADD));
+	createTexturesButton->SetToolTip(_T("Create a new TEXTURES image"));
+	delSpriteButton = new wxButton(spritePanel, ID_DELSPRITE, _T(""), wxPoint(0, 0), wxSize(32, 32), wxBU_NOTEXT);
 	delSpriteButton->SetBitmap(wxBITMAP_PNG(Sprite_Del));
 	delSpriteButton->SetToolTip(_T("Delete Sprite"));
+	exportTexturesButton = new wxButton(spritePanel, ID_EXPORTTEXTURES, _T(""), wxPoint(0, 0), wxSize(32, 32), wxBU_NOTEXT);
+	exportTexturesButton->SetBitmap(wxBITMAP_PNG(EXPORTTEX));
+	exportTexturesButton->SetToolTip(_T("Export all TEXTURES code"));
+	spriteButtonSizer->Add(applySpriteButton);
 	spriteButtonSizer->Add(loadSpriteButton);
+	spriteButtonSizer->Add(createTexturesButton);
 	spriteButtonSizer->Add(delSpriteButton);
+	spriteButtonSizer->Add(exportTexturesButton);
 
 	//spritePageSizer->SetFlexibleDirection(wxVERTICAL);
 	spritePageSizer->Add(spriteListSizer, 1, wxEXPAND | wxALL, 4);
 	spritePageSizer->Add(spriteButtonSizer, 1, wxALIGN_CENTER_HORIZONTAL | wxBOTTOM | wxRIGHT, 4);
 	spritePageSizer->AddGrowableRow(0, 1);
 
-	spritePanel->SetSizer(spritePageSizer);
+	spritePanel->SetSizerAndFit(spritePageSizer);
+	spritePreviewer->Show(dan_showSpritePreview);
+	spritePanel->Layout();
 	// =======================================================
 
 	// SOUNDS ===============================================
@@ -142,23 +198,27 @@ void DanFrame::BuildResourceLists()
 	soundButtonSizer = new wxBoxSizer(wxHORIZONTAL);
 
 
-	soundPanel = new wxPanel(ResourcesNotebook);
+	soundPanel = new wxPanel(ResourcesNotebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxNO_BORDER);
 
 	SoundsListCtrl = new wxListView(soundPanel, ID_SELECTSOUND, wxPoint(0, 0), wxSize(200, 200), wxLC_SINGLE_SEL | wxLC_SORT_ASCENDING | wxLC_REPORT | wxLC_VRULES);
 	SoundsListCtrl->AppendColumn(_T("Sound"), wxLIST_FORMAT_LEFT, -1);
 	SoundsListCtrl->AppendColumn(_T("Source"), wxLIST_FORMAT_LEFT, -1);
 	SoundsListCtrl->AppendColumn(_T("Size (bytes)"), wxLIST_FORMAT_LEFT, -1);
 	SoundsListCtrl->InsertItem(0, wxString("* No Sound"));
-	SoundsListCtrl->SetItemData(0, -9999);
+	SoundsListCtrl->SetItemData(0, CreateSortData("\0", -9999));
 	SoundsListCtrl->SetColumnWidth(0, wxLIST_AUTOSIZE);
 	soundListSizer->Add(SoundsListCtrl, 1, wxALIGN_LEFT);
 
-	loadSoundButton = new wxButton(soundPanel, ID_ADDSOUND, _T("Load Sounds..."), wxPoint(0, 0), wxSize(32, 32), wxBU_NOTEXT);
+	applySoundButton = new wxButton(soundPanel, ID_APPLYSOUNDBTN, _T(""), wxPoint(0, 0), wxSize(32, 32), wxBU_NOTEXT);
+	applySoundButton->SetBitmap(wxBITMAP_PNG(APPLYSOUND));
+	applySoundButton->SetToolTip(_T("Apply selected sound to Frame"));
+	loadSoundButton = new wxButton(soundPanel, ID_ADDSOUND, _T("."), wxPoint(0, 0), wxSize(32, 32), wxBU_NOTEXT);
 	loadSoundButton->SetBitmap(wxBITMAP_PNG(Sound_Add));
 	loadSoundButton->SetToolTip(_T("Load Sounds..."));
-	delSoundButton = new wxButton(soundPanel, ID_DELSOUND, _T("Delete Sound"), wxPoint(0, 0), wxSize(32, 32), wxBU_NOTEXT);
+	delSoundButton = new wxButton(soundPanel, ID_DELSOUND, _T(""), wxPoint(0, 0), wxSize(32, 32), wxBU_NOTEXT);
 	delSoundButton->SetBitmap(wxBITMAP_PNG(Sound_Del));
 	delSoundButton->SetToolTip(_T("Delete Sound"));
+	soundButtonSizer->Add(applySoundButton);
 	soundButtonSizer->Add(loadSoundButton);
 	soundButtonSizer->Add(delSoundButton);
 
@@ -173,6 +233,8 @@ void DanFrame::BuildResourceLists()
 	ResourcesNotebook->SetPageSize(wxSize(200, 300));
 	ResourcesNotebook->AddPage(spritePanel, _T("Sprites"), true);
 	ResourcesNotebook->AddPage(soundPanel, _T("Sounds"));
+	SpritesListCtrl->Connect(ID_SELECTSPRITE, wxEVT_LIST_ITEM_RIGHT_CLICK, wxListEventHandler(DanFrame::OnSpriteContext));
+	SoundsListCtrl->Connect(ID_SELECTSOUND, wxEVT_LIST_ITEM_RIGHT_CLICK, wxListEventHandler(DanFrame::OnSoundContext));
 }
 
 void DanFrame::BuildCanvasControls()
@@ -193,9 +255,9 @@ void DanFrame::BuildCanvasControls()
 	offsetsSizer = new wxBoxSizer(wxHORIZONTAL);
 	currentSpriteSizer = new wxBoxSizer(wxHORIZONTAL);
 	currentSoundSizer = new wxBoxSizer(wxHORIZONTAL);
-	xSpin = new wxSpinCtrl(controlBox1->GetStaticBox(), ID_XSPIN, _T("0"), wxDefaultPosition, wxSize(80, 24), wxSP_ARROW_KEYS | wxALIGN_RIGHT, -65535, 65535, 0);
+	xSpin = new wxSpinCtrl(controlBox1->GetStaticBox(), ID_XSPIN, _T("0"), wxDefaultPosition, wxSize(80, 24), wxTE_PROCESS_ENTER | wxSP_ARROW_KEYS | wxALIGN_RIGHT, -65535, 65535, 0);
 	xText = new wxStaticText(controlBox1->GetStaticBox(), wxID_ANY, _T("X:"), wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
-	ySpin = new wxSpinCtrl(controlBox1->GetStaticBox(), ID_YSPIN, _T("0"), wxDefaultPosition, wxSize(80, 24), wxSP_ARROW_KEYS | wxALIGN_RIGHT, -65535, 65535, 0);
+	ySpin = new wxSpinCtrl(controlBox1->GetStaticBox(), ID_YSPIN, _T("0"), wxDefaultPosition, wxSize(80, 24), wxTE_PROCESS_ENTER | wxSP_ARROW_KEYS | wxALIGN_RIGHT, -65535, 65535, 0);
 	yText = new wxStaticText(controlBox1->GetStaticBox(), wxID_ANY, _T("Y:"), wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
 
 	currentSpriteText = new wxStaticText(controlBox1->GetStaticBox(), wxID_ANY, _T("Sprite:"), wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
@@ -226,11 +288,13 @@ void DanFrame::BuildCanvasControls()
 	timeControlSizer = new wxFlexGridSizer(3, 1, 4, 0);
 	timeOptionsSizer = new wxFlexGridSizer(2, 1, 4, 0);
 	timelineButtonSizer = new wxBoxSizer(wxHORIZONTAL);
-	framesButtonSizer = new wxBoxSizer(wxHORIZONTAL);
+	framesButtonSizer = new wxBoxSizer(wxVERTICAL);
+	framesButtonSet1Sizer = new wxBoxSizer(wxHORIZONTAL);
+	framesButtonSet2Sizer = new wxBoxSizer(wxHORIZONTAL);
 	durationSizer = new wxBoxSizer(wxHORIZONTAL);
 	timelineSlider = new wxSlider(controlBox2->GetStaticBox(), ID_TIMESLIDER, 1, 1, 2, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_AUTOTICKS | wxSL_TICKS | wxSL_MIN_MAX_LABELS);
 	durationText = new wxStaticText(controlBox2->GetStaticBox(), wxID_ANY, _T("Tics:"), wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
-	durationSpin = new wxSpinCtrl(controlBox2->GetStaticBox(), ID_DURATION, _T("1"), wxDefaultPosition, wxSize(80, 24), wxSP_ARROW_KEYS | wxALIGN_RIGHT, 1, 65535, 1);
+	durationSpin = new wxSpinCtrl(controlBox2->GetStaticBox(), ID_DURATION, _T("1"), wxDefaultPosition, wxSize(80, 24), wxTE_PROCESS_ENTER | wxSP_ARROW_KEYS | wxALIGN_RIGHT, 1, 65535, 1);
 	loopCheckBox = new wxCheckBox(controlBox2->GetStaticBox(), wxID_ANY, _T("Loop"), wxDefaultPosition, wxDefaultSize, wxCHK_2STATE);
 	wxArrayString endings;
 	endings.Add("None");
@@ -243,7 +307,7 @@ void DanFrame::BuildCanvasControls()
 	endChoice->SetSelection(0);
 	CreateTimelineButtons();
 	timelineButtonSizer->AddSpacer(4);
-	timelineButtonSizer->Add(loopCheckBox, 0, wxALIGN_CENTER_HORIZONTAL | wxTOP, 8);
+	timelineButtonSizer->Add(loopCheckBox, 0, wxTOP, 8);
 	durationSizer->Add(durationText, 0, wxTOP, 4);
 	durationSizer->AddSpacer(4);
 	durationSizer->Add(durationSpin);
@@ -268,7 +332,7 @@ void DanFrame::BuildCanvasControls()
 	allowGhostCheckBox = new wxCheckBox(controlBox3->GetStaticBox(), wxID_ANY, _T("Ghosting"), wxDefaultPosition, wxDefaultSize, wxCHK_2STATE);
 	stencilCheckBox = new wxCheckBox(controlBox3->GetStaticBox(), wxID_ANY, _T("Stencil"), wxDefaultPosition, wxDefaultSize, wxCHK_2STATE);
 	ghostFramesText = new wxStaticText(controlBox3->GetStaticBox(), wxID_ANY, _T("Ghost Frames"), wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
-	ghostFramesSpin = new wxSpinCtrl(controlBox3->GetStaticBox(), wxID_ANY, _T("1"), wxDefaultPosition, wxSize(60, 24), wxSP_ARROW_KEYS | wxALIGN_RIGHT, 1, 10, 1);
+	ghostFramesSpin = new wxSpinCtrl(controlBox3->GetStaticBox(), wxID_ANY, _T("1"), wxDefaultPosition, wxSize(60, 24), wxTE_PROCESS_ENTER | wxSP_ARROW_KEYS | wxALIGN_RIGHT, 1, 10, 1);
 	ghostSizer = new wxBoxSizer(wxHORIZONTAL);
 	ghostSizer->Add(ghostFramesSpin, 1, wxLEFT | wxRIGHT, 4);
 	ghostSizer->AddSpacer(2);
@@ -299,32 +363,45 @@ void DanFrame::CreateTimelineButtons()
 	playFromStartButton = new wxButton(controlBox2->GetStaticBox(), ID_PLAYFROMSTART, _T("Play Animation From Start"), wxPoint(0, 0), wxSize(32, 32), wxBU_NOTEXT);
 	playFromStartButton->SetBitmap(wxBITMAP_PNG(PlayAnimStart));
 	playFromStartButton->SetToolTip(_T("Play Animation From Start"));
-	timelineButtonSizer->Add(playFromStartButton, 0, wxALIGN_CENTER_HORIZONTAL);
+	timelineButtonSizer->Add(playFromStartButton, 0);
 
 	prevFrameButton = new wxButton(controlBox2->GetStaticBox(), ID_PREVFRAME, _T("Previous Frame"), wxPoint(0, 0), wxSize(32, 32), wxBU_NOTEXT);
 	prevFrameButton->SetBitmap(wxBITMAP_PNG(FrameBack));
 	prevFrameButton->SetToolTip(_T("Previous Frame"));
-	timelineButtonSizer->Add(prevFrameButton, 0, wxALIGN_CENTER_HORIZONTAL);
+	timelineButtonSizer->Add(prevFrameButton, 0);
 
 	playButton = new wxButton(controlBox2->GetStaticBox(), ID_PLAY, _T("Play Animation"), wxPoint(0, 0), wxSize(32, 32), wxBU_NOTEXT);
 	playButton->SetBitmap(wxBITMAP_PNG(PlayAnim));
 	playButton->SetToolTip(_T("Play Animation"));
-	timelineButtonSizer->Add(playButton, 0, wxALIGN_CENTER_HORIZONTAL);
+	timelineButtonSizer->Add(playButton, 0);
 
 	nextFrameButton = new wxButton(controlBox2->GetStaticBox(), ID_NEXTFRAME, _T("Next Frame"), wxPoint(0, 0), wxSize(32, 32), wxBU_NOTEXT);
 	nextFrameButton->SetBitmap(wxBITMAP_PNG(FrameForward));
 	nextFrameButton->SetToolTip(_T("Next Frame"));
-	timelineButtonSizer->Add(nextFrameButton, 0, wxALIGN_CENTER_HORIZONTAL);
+	timelineButtonSizer->Add(nextFrameButton, 0);
 
 	addFrameButton = new wxButton(controlBox2->GetStaticBox(), ID_ADDFRAME, _T("Add Frame (uses previous frame's offsets)"), wxPoint(0, 0), wxSize(32, 32), wxBU_NOTEXT);
 	addFrameButton->SetBitmap(wxBITMAP_PNG(FRAMEADD));
 	addFrameButton->SetToolTip(_T("Add Frame"));
-	framesButtonSizer->Add(addFrameButton, 0, wxALIGN_CENTER_HORIZONTAL);
+	framesButtonSet1Sizer->Add(addFrameButton, 0);
 
 	delFrameButton = new wxButton(controlBox2->GetStaticBox(), ID_DELFRAME, _T("Delete Current Frame"), wxPoint(0, 0), wxSize(32, 32), wxBU_NOTEXT);
 	delFrameButton->SetBitmap(wxBITMAP_PNG(FRAMEDEL));
 	delFrameButton->SetToolTip(_T("Delete Frame"));
-	framesButtonSizer->Add(delFrameButton, 0, wxALIGN_CENTER_HORIZONTAL);
+	framesButtonSet1Sizer->Add(delFrameButton, 0);
+
+	insertFrameButton = new wxButton(controlBox2->GetStaticBox(), ID_INSERTFRAME, _T("Insert Frame after current"), wxPoint(0, 0), wxSize(32, 32), wxBU_NOTEXT);
+	insertFrameButton->SetBitmap(wxBITMAP_PNG(FRAMEINSERT));
+	insertFrameButton->SetToolTip(_T("Insert Frame after current"));
+	framesButtonSet2Sizer->Add(insertFrameButton, 0);
+
+	batchButton = new wxButton(controlBox2->GetStaticBox(), ID_BATCHACTION, _T("Batch Action..."), wxPoint(0, 0), wxSize(32, 32), wxBU_NOTEXT);
+	batchButton->SetBitmap(wxBITMAP_PNG(SETOFFSET));
+	batchButton->SetToolTip(_T("Batch Action..."));
+	framesButtonSet2Sizer->Add(batchButton, 0);
+
+	framesButtonSizer->Add(framesButtonSet1Sizer);
+	framesButtonSizer->Add(framesButtonSet2Sizer);
 }
 
 void DanFrame::BuildStatusBar()

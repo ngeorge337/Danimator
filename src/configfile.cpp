@@ -42,7 +42,7 @@ void ConfigFile::WriteDefaultConfig()
 
 	if(!FileSystem::OpenDir(configdir))
 		FileSystem::CreateDir(configdir);
-	FILE *src = FileSystem::CreateFile("config.cfg", FM_WRITE);
+	FILE *src = FileSystem::CreateFileLegacy("config.cfg", FM_WRITE);
 
 	if(src == nullptr)
 	{

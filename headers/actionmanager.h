@@ -20,15 +20,18 @@ enum
 	CMDTYPE_FRAMES = 1,		// Frames of animation were modified (add, removed, offsets, sprite, sound, etc.), or State was modified (deleted, added, renamed)
 	CMDTYPE_TEXTURELOAD,	// Textures were loaded in
 	CMDTYPE_SOUNDLOAD,		// Sounds were loaded in
+	CMDTYPE_TEXTURES,		// Information for TEXTURES was changed.
 };
 
 struct action_t
 {
 	int actionType;
+	int lastLayerSelected;
 	std::string actMessage;
 	std::string lastState;
 	std::map<std::string, FState_t> oldState;
 	std::vector<rowData_t> oldStateList;
+	std::vector<CompositeLayer_t> oldTexLayers;
 	std::vector<wxListItem> oldSpriteList;
 	std::vector<wxListItem> oldSoundList;
 };
@@ -37,16 +40,14 @@ struct action_t
 class ActionManager
 {
 public:
-	void Insert(int type, const std::string &actionMessage);
+	void Insert(int type, const std::string &actionMessage, bool clearRedo = true);
 	void Undo();
 	void Redo();
 	void Wipe();
-private:
+protected:
 	void InsertRedo(int type, const std::string &actionMessage);
-	void InsertUndo(int type, const std::string &actionMessage);
-	void Finish();
+	virtual void Finish();
 
 	std::deque<action_t> m_commands;
 	std::deque<action_t> m_undone;
 };
-

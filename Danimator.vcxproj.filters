@@ -104,9 +104,6 @@
     <ClInclude Include="headers\camera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="headers\codewindow.h">
-      <Filter>GUI\Animation</Filter>
-    </ClInclude>
     <ClInclude Include="headers\mainFrame.h">
       <Filter>GUI\Animation</Filter>
     </ClInclude>
@@ -136,6 +133,24 @@
     </ClInclude>
     <ClInclude Include="headers\CheckedListCtrl.h">
       <Filter>Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="headers\compositetexture.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="headers\codewindow.h">
+      <Filter>GUI\Misc</Filter>
+    </ClInclude>
+    <ClInclude Include="headers\alert.h">
+      <Filter>GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="headers\SpritePreview.h">
+      <Filter>Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="headers\batchaction.h">
+      <Filter>GUI\Misc</Filter>
+    </ClInclude>
+    <ClInclude Include="headers\serializer.h">
+      <Filter>GUI</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -187,9 +202,6 @@
     <ClCompile Include="src\camera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\codewindow.cpp">
-      <Filter>GUI\Animation</Filter>
-    </ClCompile>
     <ClCompile Include="src\mainFrame.cpp">
       <Filter>GUI\Animation</Filter>
     </ClCompile>
@@ -225,6 +237,30 @@
     </ClCompile>
     <ClCompile Include="src\CheckedListCtrl.cpp">
       <Filter>Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="src\textualCreation.cpp">
+      <Filter>GUI\Textures</Filter>
+    </ClCompile>
+    <ClCompile Include="src\compositetexture.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\codewindow.cpp">
+      <Filter>GUI\Misc</Filter>
+    </ClCompile>
+    <ClCompile Include="src\textualEvents.cpp">
+      <Filter>GUI\Textures</Filter>
+    </ClCompile>
+    <ClCompile Include="src\SpritePreview.cpp">
+      <Filter>Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="src\batchaction.cpp">
+      <Filter>GUI\Misc</Filter>
+    </ClCompile>
+    <ClCompile Include="src\projectfile.cpp">
+      <Filter>GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="src\projectfileOld.cpp">
+      <Filter>GUI</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -339,6 +375,18 @@
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="icons\beta2\tx_view.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="icons\beta2\app.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="icons\beta2\crop_t.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="icons\beta2\icon2.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="icons\beta2\myicon.ico">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

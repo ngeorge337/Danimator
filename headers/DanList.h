@@ -1,13 +1,5 @@
 #pragma once
 
-struct rowData_t
-{
-	std::vector<wxListItem> m_row;
-
-	std::vector<wxListItem> &GetRowData();
-	void SetColumnOfThisRow(int col, wxListItem item);
-};
-
 // srsly why is wxListCtrl such an inaccessible piece of garbage ancient programming standardadldfg kdjdsklrjgdjfnsdklrj
 class DanList : public wxListView
 {
@@ -23,6 +15,7 @@ public:
 	long DanSetItem(long index, long col, wxString text);
 	std::vector<rowData_t> DanGetItems();
 	void DanRestoreItems(std::vector<rowData_t> &items);
+	void ChangeOwner(wxString oldName, wxString newName);
 
 	virtual void OnIdle(wxIdleEvent& event);
 

@@ -440,7 +440,7 @@ protected :
     ControlRef  m_controlRef;
     wxFont      m_font;
     long        m_windowStyle;
-    DECLARE_DYNAMIC_CLASS_NO_COPY(wxMacControl)
+    wxDECLARE_DYNAMIC_CLASS_NO_COPY(wxMacControl);
 };
 
 // ============================================================================
@@ -581,7 +581,7 @@ protected :
     virtual Boolean CompareItems(DataBrowserItemID itemOneID,
         DataBrowserItemID itemTwoID,
         DataBrowserPropertyID sortProperty) = 0;
-    DECLARE_ABSTRACT_CLASS(wxMacDataBrowserControl)
+    wxDECLARE_ABSTRACT_CLASS(wxMacDataBrowserControl);
 };
 
 // ============================================================================
@@ -755,7 +755,7 @@ protected:
 private :
 
     bool m_suppressSelection;
-    DECLARE_DYNAMIC_CLASS_NO_COPY(wxMacDataItemBrowserControl)
+    wxDECLARE_DYNAMIC_CLASS_NO_COPY(wxMacDataItemBrowserControl);
 };
 
 class WXDLLIMPEXP_CORE wxMacDataItemBrowserSelectionSuppressor
@@ -894,7 +894,7 @@ private:
     wxArrayMacDataBrowserColumns m_columns;
     int m_nextColumnId ;
 
-    DECLARE_DYNAMIC_CLASS_NO_COPY(wxMacDataBrowserListControl)
+    wxDECLARE_DYNAMIC_CLASS_NO_COPY(wxMacDataBrowserListControl);
 };
 
 // ============================================================================
@@ -998,6 +998,11 @@ public :
 
     virtual void SetTitle( const wxString& title, wxFontEncoding encoding ) ;
 
+    // Enabling/disabling of title bar buttons not implemented for Carbon.
+    virtual bool EnableCloseButton(bool WXUNUSED(enable)) { return false; }
+    virtual bool EnableMaximizeButton(bool WXUNUSED(enable)) { return false; }
+    virtual bool EnableMinimizeButton(bool WXUNUSED(enable)) { return false; }
+
     virtual bool IsMaximized() const;
 
     virtual bool IsIconized() const;
@@ -1007,6 +1012,8 @@ public :
     virtual void Maximize(bool maximize);
 
     virtual bool IsFullScreen() const;
+
+    bool EnableFullScreenView(bool enable) wxOVERRIDE;
 
     virtual bool ShowFullScreen(bool show, long style);
 
@@ -1036,7 +1043,7 @@ protected :
     WXEVENTHANDLERREF   m_macEventHandler ;
     WindowRef           m_macWindow;
     void *              m_macFullScreenData ;
-    DECLARE_DYNAMIC_CLASS_NO_COPY(wxNonOwnedWindowCarbonImpl)
+    wxDECLARE_DYNAMIC_CLASS_NO_COPY(wxNonOwnedWindowCarbonImpl);
 };
 
 #endif // wxUSE_GUI

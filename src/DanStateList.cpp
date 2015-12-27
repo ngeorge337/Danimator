@@ -27,11 +27,11 @@ void DanStateList::OnUpdateInfo()
 	for(auto it = states.begin(); it != states.end(); ++it)
 	{
 		++i;
-		int count = it->second.m_frames.size();
+		int count = states[m_listItems[i].m_owningStateName].m_frames.size();
 		DanSetItem(i, COL_STATE_FRAMES, wxString(std::to_string(count)));
 		int totalTime = 0;
 		for(int x = 0; x < count; x++)
-			totalTime += it->second.m_frames[x].tics;
+			totalTime += states[m_listItems[i].m_owningStateName].m_frames[x].tics;
 		DanSetItem(i, COL_STATE_DURATION, wxString(std::to_string(totalTime)));
 	}
 }

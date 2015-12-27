@@ -1,14 +1,9 @@
 #include "libs.h"
-#include "animator.h"
 #include "DanList.h"
 #include "DanStateList.h"
 #include "SFMLControl.h"
 #include "textualPanel.h"
 #include "mainFrame.h"
-#include "actionmanager.h"
-#include "resrcman.h"
-#include "texman.h"
-#include "soundman.h"
 #include "locator.h"
 #include "textualView.h"
 
@@ -27,14 +22,30 @@ wxEND_EVENT_TABLE()
 
 void TextualView::OnUpdate()
 {
+	setActive(true);
+
 	bool stencil = theFrame->textualPanel->stencilBox->GetValue();
 
-	if(!runOnce)
+
+	if(!runOnce2)
 	{
-		runOnce = true;
+		runOnce2 = true;
+
+		textureRect = sf::RectangleShape(sf::Vector2f(64, 64));
+		textureRect.setFillColor(sf::Color::Cyan);
 
 		DanStatusBar *bar = static_cast<DanStatusBar *>(theFrame->GetStatusBar());
 		if(bar) bar->SetZoomValue(m_zoomlevel);
+	}
+
+
+	if(theFrame->textualPanel->GetActiveTexture() != nullptr)
+	{
+		sf::Vector2f rectSize = sf::Vector2f(theFrame->textualPanel->GetActiveTexture()->GetDimensions());
+		sf::Vector2f rectScales = theFrame->textualPanel->GetActiveTexture()->GetScaleFactor();
+		rectSize.x *= rectScales.x;
+		rectSize.y *= rectScales.y;
+		textureRect.setSize(rectSize);
 	}
 
 	Camera::GetCamera().setSize(sf::Vector2f(theFrame->textualPanel->textualView->GetSize().x, theFrame->textualPanel->textualView->GetSize().y));
@@ -46,7 +57,7 @@ void TextualView::OnUpdate()
 	}
 	rt->setSmooth(false);
 
-	Camera::GetCamera().setCenter(sf::Vector2f(Round(textureRect.getScale().x), Round(textureRect.getScale().y)));
+	Camera::GetCamera().setCenter(sf::Vector2f(Round(textureRect.getSize().x * 0.5f), Round(textureRect.getSize().y * 0.5f)));
 	Camera::GetCamera().setViewport(sf::FloatRect(0, 0, 1, 1));
 	Camera::GetCamera().zoom(m_zoom);
 	sf::Listener::setPosition(Camera::GetCamera().getCenter().x, 0, Camera::GetCamera().getCenter().y);
@@ -73,29 +84,35 @@ void TextualView::OnUpdate()
 	}
 	rt->draw(textureRect);
 
-	activeLayer = theFrame->textualPanel->LayerList->GetSelection();
+	//activeLayer = theFrame->textualPanel->LayerList->GetSelection();
+	activeLayer = theFrame->textualPanel->GetActualSelection();
 
 	if(theFrame->textualPanel->m_activeTexture != nullptr)
 	{
 		if(theFrame->textualPanel->m_activeTexture->GetAllLayers().size() > 0 && activeLayer >= 0)
 		{
-			if(this->GetScreenRect().Contains(wxGetMousePosition()))
+			if(this->GetScreenRect().Contains(wxGetMousePosition()) && !theFrame->inModal)
 			{
-				if(isCapturing || theFrame->textualPanel->m_activeTexture->GetLayer(activeLayer).spr.getGlobalBounds().contains(pos))
+				sf::FloatRect boundary = theFrame->textualPanel->m_activeTexture->GetLayer(activeLayer).spr.getGlobalBounds();
+				if(theFrame->textualPanel->m_activeTexture->GetLayer(activeLayer).rotValue == 1 || theFrame->textualPanel->m_activeTexture->GetLayer(activeLayer).rotValue == 3)
+					swapvalues(boundary.width, boundary.height);
+				boundary.width *= theFrame->textualPanel->GetActiveTexture()->GetScaleFactor().x;
+				boundary.height *= theFrame->textualPanel->GetActiveTexture()->GetScaleFactor().y;
+				if(isCapturing || boundary.contains(pos))
 				{
 					// draw outlining rect
-					if(stencil) glDisable(GL_STENCIL_TEST);
-					outlineRect = sf::RectangleShape(sf::Vector2f(theFrame->textualPanel->m_activeTexture->GetLayer(activeLayer).spr.getTexture()->getSize()));
+					sf::Vector2f selSize = sf::Vector2f(theFrame->textualPanel->m_activeTexture->GetLayer(activeLayer).spr.getTexture()->getSize());
+					if(theFrame->textualPanel->m_activeTexture->GetLayer(activeLayer).rotValue == 1 || theFrame->textualPanel->m_activeTexture->GetLayer(activeLayer).rotValue == 3)
+						swapvalues(selSize.x, selSize.y);
+					selSize.x *= theFrame->textualPanel->GetActiveTexture()->GetScaleFactor().x;
+					selSize.y *= theFrame->textualPanel->GetActiveTexture()->GetScaleFactor().y;
+					outlineRect = sf::RectangleShape(selSize);
 					outlineRect.setFillColor(sf::Color::Transparent);
 					outlineRect.setSize(sf::Vector2f(outlineRect.getSize().x - 2, outlineRect.getSize().y - 2));
 					outlineRect.setPosition(sf::Vector2f(theFrame->textualPanel->m_activeTexture->GetLayer(activeLayer).spr.getPosition().x + 1, theFrame->textualPanel->m_activeTexture->GetLayer(activeLayer).spr.getPosition().y + 1));
 					outlineRect.setOutlineColor(sf::Color::Red);
 					outlineRect.setOutlineThickness(1.f);
 					allowCapture = true;
-
-					rt->draw(outlineRect);
-
-					if(stencil) glEnable(GL_STENCIL_TEST);
 				}
 				else
 					allowCapture = false;
@@ -107,17 +124,20 @@ void TextualView::OnUpdate()
 
 	if(allowCapture && capturemode && sf::Mouse::isButtonPressed(sf::Mouse::Button::Left) && !theFrame->playingMode)
 	{
-		if(theFrame->GetAnimator().GetCurrentState() != nullptr)
+		if(theFrame->textualPanel->m_activeTexture != nullptr)
 		{
-			//if(!isCapturing)
-			//	Locator::GetActionManager()->Insert(CMDTYPE_FRAMES, FormatString("Drag offset for %s, frame %d", theFrame->GetAnimator().GetCurrentState()->name, theFrame->GetAnimator().GetCurrentState()->GetOffset() + 1));
-			isCapturing = true;
-			sf::Vector2i diff = sf::Vector2i(pos) - lastPos;
-			lastPos = sf::Vector2i(pos);
-			theFrame->textualPanel->m_activeTexture->GetLayer(activeLayer).spr.move(sf::Vector2f(diff));
-			theFrame->xSpin->SetValue(int(theFrame->textualPanel->m_activeTexture->GetLayer(activeLayer).spr.getPosition().x));
-			theFrame->ySpin->SetValue(int(theFrame->textualPanel->m_activeTexture->GetLayer(activeLayer).spr.getPosition().y));
-			theFrame->saved = false;
+			if(theFrame->textualPanel->m_activeTexture->GetAllLayers().size() > 0 && activeLayer >= 0)
+			{
+				if(!isCapturing)
+					theFrame->textualPanel->m_activeTexture->GetActionHistory().Insert(CMDTYPE_TEXTURES, FormatString("Drag offset for layer '%s'", theFrame->textualPanel->m_activeTexture->GetLayer(activeLayer).layerName));
+				isCapturing = true;
+				sf::Vector2i diff = sf::Vector2i(pos) - lastPos;
+				lastPos = sf::Vector2i(pos);
+				theFrame->textualPanel->m_activeTexture->GetLayer(activeLayer).spr.move(sf::Vector2f(diff));
+				theFrame->textualPanel->xSpin->SetValue(int(theFrame->textualPanel->m_activeTexture->GetLayer(activeLayer).spr.getPosition().x));
+				theFrame->textualPanel->ySpin->SetValue(int(theFrame->textualPanel->m_activeTexture->GetLayer(activeLayer).spr.getPosition().y));
+				theFrame->saved = false;
+			}
 		}
 	}
 
@@ -127,11 +147,15 @@ void TextualView::OnUpdate()
 		glStencilOp(GL_KEEP, GL_REPLACE, GL_REPLACE);
 	}
 
-	if(theFrame->textualPanel->m_activeTexture != nullptr)
+	if(theFrame->textualPanel->GetActiveTexture() != nullptr)
 	{
-		for(int i = 0; i < theFrame->textualPanel->m_activeTexture->GetAllLayers().size(); i++)
+		rt->draw(*theFrame->textualPanel->GetActiveTexture());
+
+		if(allowCapture)
 		{
-			rt->draw(theFrame->textualPanel->m_activeTexture->GetLayer(i).spr);
+			if(stencil) glDisable(GL_STENCIL_TEST);
+			rt->draw(outlineRect);
+			if(stencil) glEnable(GL_STENCIL_TEST);
 		}
 	}
 
@@ -164,7 +188,24 @@ TextualView::TextualView(wxWindow* Parent /*= NULL*/, wxWindowID Id /*= -1*/, co
 	settings.stencilBits = 8;
 	sf::RenderWindow::create(GetHandle(), settings);
 
+	runOnce2 = false;
+
+	//textureRect = sf::RectangleShape(sf::Vector2f(64, 64));
+	//textureRect.setFillColor(sf::Color::Cyan);
+
 	rt = new sf::RenderTexture();
 	rt->create(640, 480, true);
 	rt->setSmooth(false);
+}
+
+sf::Vector2f TextualView::GetCanvasMousePosition()
+{
+	sf::Vector2f pos;
+	wxPoint p = ScreenToClient(wxPoint(sf::Mouse::getPosition().x, sf::Mouse::getPosition().y));
+	pos.x = p.x;
+	pos.y = p.y;
+	pos.x = Round(pos.x);
+	pos.y = Round(pos.y);
+	pos = rt->mapPixelToCoords(sf::Vector2i(pos));
+	return pos;
 }

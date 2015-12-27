@@ -16,11 +16,24 @@ public:
 	// Rendering options
 	wxPanel *renderingPanel;
 	wxCheckBox *bilinearCheckbox;
+	wxCheckBox *previewCheckbox;
+
+	// Editor Warnings options
+	wxPanel *warningsPanel;
+	wxStaticText *warnIfTxt;
+	wxCheckBox *warnDeleteSpriteCheckbox;
+	wxCheckBox *warnDeleteSoundCheckbox;
+	wxCheckBox *warnBadSpriteNamesCheckbox;
+	wxCheckBox *warnBadTextureNamesCheckbox;
+	wxCheckBox *warnBadExportCheckbox;
+	wxCheckBox *warnBakeCheckbox;
+	wxCheckBox *warnImportTexturesCheckbox;
 
 	// Sizers
 	wxBoxSizer *prefSizer;
 	wxBoxSizer *embeddingSizer;
 	wxBoxSizer *renderingSizer;
+	wxBoxSizer *warningsSizer;
 
 private:
 };

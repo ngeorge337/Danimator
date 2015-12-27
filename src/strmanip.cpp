@@ -410,3 +410,15 @@ std::string StripOuterQuotes( std::string &str )
 	_ext = sc.SplitAtPosition(sc.GetPosition());
 	return _ext.GetSecond();
 }
+
+std::string RemoveWhiteSpace(const std::string &str)
+{
+	Parser parser;
+	parser.OpenString(str);
+	std::string ret = "";
+	while(parser.GetState() == PS_GOOD)
+	{
+		ret += parser.GetToken();
+	}
+	return ret;
+}

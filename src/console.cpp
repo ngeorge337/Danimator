@@ -94,7 +94,7 @@ bool ConsoleLogFile::Open(std::string name, eFileMode md)
 		SuggestExtension(".log");
 		name = name + ".log";
 	}
-	src = FileSystem::CreateFile(name, md);
+	src = FileSystem::CreateFileLegacy(name, md);
 	if(src == nullptr)
 	{
 		Console->LogMessage("Unable to write log file!");

@@ -107,6 +107,7 @@ public:
 
     void Resolve(const wxURI& base, int flags = wxURI_STRICT);
     bool IsReference() const;
+    bool IsRelative() const;
 
 protected:
     void Clear();
@@ -180,7 +181,7 @@ protected:
 
     size_t m_fields;
 
-    DECLARE_DYNAMIC_CLASS(wxURI)
+    wxDECLARE_DYNAMIC_CLASS(wxURI);
 };
 
 #endif // _WX_URI_H_

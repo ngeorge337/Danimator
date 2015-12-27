@@ -48,7 +48,7 @@ public :
     virtual bool resignFirstResponder(WXWidget slf, void *_cmd);
 
     virtual void SetInternalSelection( long from , long to );
-
+    virtual void UpdateInternalSelectionFromEditor( wxNSTextFieldEditor* editor);
 protected :
     NSTextField* m_textField;
     long m_selStart;
@@ -62,9 +62,11 @@ private:
 class wxNSTextViewControl : public wxWidgetCocoaImpl, public wxTextWidgetImpl
 {
 public:
-    wxNSTextViewControl( wxTextCtrl *wxPeer, WXWidget w );
+    wxNSTextViewControl( wxTextCtrl *wxPeer, WXWidget w, long style );
     virtual ~wxNSTextViewControl();
 
+    virtual void insertText(NSString* text, WXWidget slf, void *_cmd);
+    
     virtual wxString GetStringValue() const ;
     virtual void SetStringValue( const wxString &str) ;
     virtual void Copy() ;

@@ -13,11 +13,7 @@ enum
 struct Frame_t
 {
 	//frame_t() : duration(1.f), sprite(nullptr), action([] () {})
-	Frame_t() : duration(1.f), tics(1), sprite(sf::Sprite()), spriteName("TNT1A0"), soundName(""), hasSound(false)
-	{
-		sprite.setTexture(*Locator::GetTextureManager()->GetTexture("TNT1A0"), true);
-		duration = TICS(1);
-	};
+	Frame_t();;
 
 	float duration;
 	int tics;
@@ -54,6 +50,7 @@ struct FState_t
 	void Reset(int offset = 0);
 	Frame_t &AddFrame(std::shared_ptr<sf::Texture> _texture, float _duration);
 	Frame_t &AddEmptyFrame();
+	Frame_t &InsertEmptyFrame(int pos = -1);
 	void RemoveFrame(int pos = -1);
 	Frame_t &GetCurrentFrame();
 	Frame_t &GetFrame(int offset);
@@ -80,8 +77,11 @@ public:
 
 	FState_t *CreateState(const std::string &_name);
 	void DeleteState(const std::string &_name);
+	void DuplicateState(const std::string &name, const std::string &newName);
+	void RenameState(const std::string &name, const std::string &newName);
 	FState_t *GetState(const std::string &_name);
 	FState_t *GetCurrentState();
+	void SetNull();
 
 	bool IsValidState(const std::string &_name);
 
@@ -92,6 +92,11 @@ public:
 
 	void SetStateFlipX(bool x);
 	void SetStateFlipY(bool y);
+
+	void EnsureSpritePointers();
+
+	void UpdateSpriteNames(const std::string &oldname, const std::string &newname);
+	void UpdateSoundNames(const std::string &oldname, const std::string &newname);
 
 
 	virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;

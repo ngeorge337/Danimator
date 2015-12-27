@@ -65,7 +65,8 @@
 #include <SFML/Audio.hpp>
 
 #define wxNO_WEBVIEW_LIB
-#include "wx/setup.h"
+//#include "wx/setup.h"
+#include "wx/wxprec.h"
 #include "wx/wx.h"
 #include "wx/notebook.h"
 #include "wx/glcanvas.h"
@@ -78,6 +79,58 @@
 #include "wx/renderer.h"
 #include "wx/colour.h"
 #include "wx/clrpicker.h"
+#include "wx/dnd.h"
+#include "wx/dir.h"
+
+
+// Magick Setup
+#include "Magick++.h"
+
+
+struct SpriteSort_t
+{
+	wxString sprString;
+	int sprHash;
+};
+
+struct rowData_t
+{
+	std::vector<wxListItem> m_row;
+	std::string m_owningStateName;
+
+	inline std::vector<wxListItem> &GetRowData()
+	{
+		return m_row;
+	}
+	inline void SetColumnOfThisRow(int col, wxListItem item)
+	{
+		if(m_row.size() < col + 1)
+			m_row.resize(col + 1);
+		m_row[col] = item;
+	}
+};
+
+
+struct CompositeLayer_t
+{
+	CompositeLayer_t() : rotValue(0), renderStyle(0), isVisible(true), opacityValue(255), spr(sf::Sprite()), spriteName("TNT1A0"), layerName(""), flipX(false), flipY(false)
+	{
+	}
+
+	CompositeLayer_t(std::string _layername) : layerName(_layername), rotValue(0), renderStyle(0), isVisible(true), opacityValue(255), spr(sf::Sprite()), spriteName("TNT1A0"), flipX(false), flipY(false)
+	{
+	}
+	sf::Sprite spr;
+	std::string spriteName;
+	std::string layerName;
+	int rotValue;	// 0 = 0 deg, 1 = 90, 2 = 180, 3 = 270
+	int opacityValue;
+	int renderStyle;
+	bool isVisible;
+	bool flipX;
+	bool flipY;
+};
+
 
 #include "util.h"
 #include "static.h"
@@ -91,16 +144,22 @@
 #include "waiting.h"
 #include "file.h"
 #include "configfile.h"
+#include "serializer.h"
 #include "console.h"
 #include "ccmd.h"
 #include "cvar.h"
 #include "externcvar.h"
 #include "camera.h"
 
+#include "animator.h"
+#include "actionmanager.h"
+#include "compositetexture.h"
+
 #include "resrcman.h"
 #include "texman.h"
 #include "soundman.h"
 #include "audio.h"
+
 
 static Random random(time(NULL));
 

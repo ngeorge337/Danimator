@@ -9,6 +9,7 @@ DanFrame *theFrame;
 bool DanApp::OnInit()
 {
 	// Initialization
+	Magick::InitializeMagick("");
 	wxImage::AddHandler(new wxPNGHandler);
 	ThreadPool::Init();
 	Locator::Init();
@@ -19,10 +20,12 @@ bool DanApp::OnInit()
 	cfg->ReadConfig();
 	Cvars->ReadCVars(*cfg);
 	CCMDMan->ReadCCMDs(*cfg);
-
+	
 	// Make the initial frame (toplevel window)
-	theFrame = new DanFrame("Danimator", wxPoint(0, 0), wxSize(954, 660));
-	theFrame->SetSize(wxSize(954, 660));
+	theFrame = new DanFrame("Danimator", wxPoint(0, 0), wxSize(970, 660));
+	theFrame->SetSize(wxSize(970, 660));
+	theFrame->SetIcon(wxICON(MYICON));
+	this->SetTopWindow(theFrame);
 	//theFrame->SetMinSize(wxSize(1088, 600));
 
 	//rw.create(theFrame->glCanvas->GetHandle(), sf::ContextSettings(24, 8, 0, 2, 1));
@@ -45,6 +48,6 @@ int DanApp::FilterEvent(wxEvent& event)
 {
 	if(event.GetEventType() == wxEVT_KEY_DOWN)
 		return theFrame->OnHotkey((wxKeyEvent&)event);
-
+	
 	return wxApp::FilterEvent(event);
 }

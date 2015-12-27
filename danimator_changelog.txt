@@ -2,7 +2,7 @@
 Beta 2 Changelog
 ====================
 -Fixed opening Project didn't set timeline max value of state correctly
--Fixed rendering artifacts in the sprite view
+-Fixed some rendering artifacts in the sprite view
 -Fixed play/stop animation tooltip showing "play animation" when it should read "stop animation"
 -Fixed being able to use the editor controls after deleting a state, causing possible crashes
 -Fixed bug where an embedding option was not saving to config file
@@ -11,6 +11,9 @@ Beta 2 Changelog
 -Fixed allowing one to open multiple code view windows
 -Fixed potential bug where sprite offsets could be adjusted during animation playback
 -Fixed size of File menu bitmaps being larger than intended
+-Fixed adding sprite or sound resources of the same name not replacing already loaded ones (instead they are silently ignored; might revisit this in the future)
+-Fixed allowing spaces in state names; all white space is now cleared from states when entered
+-Fixed the "play sounds" option checkbox not actually working
 -Project name now shows up in the titlebar when saved or loaded
 -Slight change to DECORATE code formatting (one less tab indent)
 -Reduced size of Code window a bit to accomodate (less screen cluttering)
@@ -21,5 +24,19 @@ Beta 2 Changelog
 -Added data columns to state and resource lists indicating additional information like frame count, dimensions, etc.
 -Added Undo/Redo system for most editing actions
 -Added Stencil option to hide parts of the sprite frame that go outside of the visible area
+-Added a current frame display in the status bar, indicating the current frame number in the timeline
 -Replaced +/- icons for add/remove frame with new custom ones
 -Increased range of X/Y offset spinners from +/-1024 to +/-65535 (kinda overkill but hey, it's allowed!)
+-Added notification in status bar for when a save occurs
+-Added TEXTUAL, a visual TEXTURES editor/compositor (see information below)
+-Allowed access to Resource controls without states, due to the new save format accepting this and the introduction of TEXTUAL
+-Added "Apply Sprite/Sound" buttons to the resource panels to remove the obscure method of utilizing them (though the old double-click ability is still present)
+-Added an application icon (wowie!)
+-Added a number of warnings for when potential errors or permanent actions are being taken. These warnings can be disabled in the Settings dialog
+-Added a sprite previewer that displays above the resource list (can be disabled in the Settings dialog)
+-Added drag and drop capability for sprites; one can now drop sprite images onto the appropriate resource list to load them
+-Added a Batch Action dialog which allows (off)setting of sprite offsets or tics across multiple frames at once
+-Added Copy and Paste actions for single animation frames
+-Added the ability to export animation states to an animated GIF image via the right-click context menu (with some limitations; see below)
+-Added an Import and Export options to the menu bar. Users can export loaded resources and custom textures to a .danres file which can then be imported into other projects as embedded data.
+-Added the ability to import SNDINFO lumps. Danimator will ask for the lump, and then a base directory to search for sound files, then it will parse the SNDINFO and load appropriate sounds with matching SNDINFO entries.

@@ -3,7 +3,7 @@
 class DanCode : public wxFrame
 {
 public:
-	DanCode(wxWindow *parent, const wxString& title, const wxPoint& pos, const wxSize& size);
+	DanCode(wxString &code, wxWindow *parent, const wxString& title, const wxPoint& pos, const wxSize& size);
 
 	wxBoxSizer *codeSizer;
 	wxPanel *codePanel;

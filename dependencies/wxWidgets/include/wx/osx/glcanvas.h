@@ -73,7 +73,7 @@ public:
     virtual ~wxGLCanvas();
 
     // implement wxGLCanvasBase methods
-    virtual bool SwapBuffers();
+    virtual bool SwapBuffers() wxOVERRIDE;
 
 
     // Mac-specific functions
@@ -155,8 +155,8 @@ protected:
     GLint m_bufferName;
 #endif
 
-    DECLARE_EVENT_TABLE()
-    DECLARE_CLASS(wxGLCanvas)
+    wxDECLARE_EVENT_TABLE();
+    wxDECLARE_CLASS(wxGLCanvas);
 };
 
 #endif // _WX_GLCANVAS_H_

@@ -8,6 +8,8 @@ public:
 
 	int GetZoomLevel() const { return wxSFMLCanvas::m_zoomlevel; }
 
+	virtual sf::Vector2f GetCanvasMousePosition();
+
 protected:
 
 	int activeLayer;
@@ -17,6 +19,8 @@ protected:
 	sf::RenderTexture *rt;
 	sf::Sprite renderSprite;
 	
+	bool runOnce2;
+
 	sf::RectangleShape textureRect;
 
 	virtual void OnUpdate();
