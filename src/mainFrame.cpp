@@ -627,7 +627,7 @@ DanStatusBar::DanStatusBar(wxWindow *parent, long style) : wxStatusBar(parent, w
 
 	zoomText = new wxStaticText(this, wxID_ANY, "Zoom: ", wxPoint(GetSize().GetWidth() - 198, 0), wxDefaultSize, 0);
 	zoomValue = new wxStaticText(this, wxID_ANY, "   %",  wxPoint(GetSize().GetWidth() - 160, 0), wxDefaultSize, wxALIGN_RIGHT);
-	zoomSlider = new wxSlider(this, ID_STATUS_ZOOM, 25, 2, 35, wxPoint(GetSize().GetWidth() - 130, 0), wxSize(120, 22), wxSL_HORIZONTAL);
+	zoomSlider = new wxSlider(this, ID_STATUS_ZOOM, 25, 2, 39, wxPoint(GetSize().GetWidth() - 130, 0), wxSize(120, 22), wxSL_HORIZONTAL);
 }
 
 void DanStatusBar::OnSize(wxSizeEvent& event)

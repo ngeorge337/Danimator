@@ -239,6 +239,7 @@ void TextualPanel::BuildCanvas()
 	namespaceSizer->Add(namespaceChoice, 1, wxALIGN_CENTER_VERTICAL);
 
 	stencilBox = new wxCheckBox(textureControlsGroup->GetStaticBox(), ID_FLIPX, _T("Stencil"));
+	stencilBox->SetToolTip(_T("Use the viewport to clip sprites, providing a more accurate in-game appearance"));
 
 	textureControlsGroup->Add(dimsSizer, 0, wxEXPAND | wxLEFT | wxRIGHT | wxBOTTOM, 4);
 	textureControlsGroup->Add(scalesSizer, 0, wxEXPAND | wxLEFT | wxRIGHT | wxBOTTOM, 4);

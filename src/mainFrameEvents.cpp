@@ -444,8 +444,8 @@ void DanFrame::OnSettings(wxCommandEvent& event)
 		warn_badspritenames = pd->warnBadSpriteNamesCheckbox->GetValue();
 		warn_badtexturename = pd->warnBadTextureNamesCheckbox->GetValue();
 		warn_badexport = pd->warnBadExportCheckbox->GetValue();
-		warn_bakesprite = pd->warnBakeCheckbox->GetValue();
-		warn_importtextures = pd->warnImportTexturesCheckbox->GetValue();
+		//warn_bakesprite = pd->warnBakeCheckbox->GetValue();
+		//warn_importtextures = pd->warnImportTexturesCheckbox->GetValue();
 
 
 		spritePreviewer->Show(dan_showSpritePreview);

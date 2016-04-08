@@ -306,13 +306,13 @@ void wxSFMLCanvas::OnScrollWheel(wxMouseEvent& event)
 {
 	int delta = event.GetWheelRotation();
 	// max zoom out = 10% (1.9f)
-	// max zoom in = 175% (0.25f)
+	// max zoom in = 250% (0.25f)
 	if(delta < 0 && m_zoomlevel > 10)	// zoom out (increase zoom value == increasing view size)
 	{
 		m_zoom += 0.05f;
 		m_zoomlevel -= 5;
 	}
-	else if(delta > 0 && m_zoomlevel < 175) // zoom in (decrease zoom value == decrease view size)
+	else if(delta > 0 && m_zoomlevel < 195) // zoom in (decrease zoom value == decrease view size)
 	{
 		m_zoom -= 0.05f;
 		m_zoomlevel += 5;

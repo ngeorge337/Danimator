@@ -327,10 +327,14 @@ void DanFrame::BuildCanvasControls()
 	// Options (ghosting, etc.)
 	controlBox3 = new wxStaticBoxSizer(wxVERTICAL, DanPanel, _T("Options"));
 	crosshairCheckBox = new wxCheckBox(controlBox3->GetStaticBox(), wxID_ANY, _T("Crosshair"), wxDefaultPosition, wxDefaultSize, wxCHK_2STATE);
+	crosshairCheckBox->SetToolTip(_T("Draws a basic crosshair in the center of the viewport\nto help with visual alignment"));
 	allowSoundCheckBox = new wxCheckBox(controlBox3->GetStaticBox(), wxID_ANY, _T("Play Sounds"), wxDefaultPosition, wxDefaultSize, wxCHK_2STATE);
+	allowSoundCheckBox->SetToolTip(_T("Toggle sound simulation during animation playback"));
 	allowSoundCheckBox->SetValue(true);
 	allowGhostCheckBox = new wxCheckBox(controlBox3->GetStaticBox(), wxID_ANY, _T("Ghosting"), wxDefaultPosition, wxDefaultSize, wxCHK_2STATE);
+	allowGhostCheckBox->SetToolTip(_T("Display 'ghost frames' number of previous animation frames\nblended into the viewport to help with motion and alignment"));
 	stencilCheckBox = new wxCheckBox(controlBox3->GetStaticBox(), wxID_ANY, _T("Stencil"), wxDefaultPosition, wxDefaultSize, wxCHK_2STATE);
+	stencilCheckBox->SetToolTip(_T("Use the viewport to clip sprites, providing a more accurate in-game appearance"));
 	ghostFramesText = new wxStaticText(controlBox3->GetStaticBox(), wxID_ANY, _T("Ghost Frames"), wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
 	ghostFramesSpin = new wxSpinCtrl(controlBox3->GetStaticBox(), wxID_ANY, _T("1"), wxDefaultPosition, wxSize(60, 24), wxTE_PROCESS_ENTER | wxSP_ARROW_KEYS | wxALIGN_RIGHT, 1, 10, 1);
 	ghostSizer = new wxBoxSizer(wxHORIZONTAL);
