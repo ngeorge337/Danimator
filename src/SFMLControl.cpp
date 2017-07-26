@@ -9,7 +9,7 @@
 #include "resrcman.h"
 #include "texman.h"
 #include "soundman.h"
-#include "locator.h"
+#include "services.h"
 
 CVAR(Bool, r_bilinear, true, false, true, "Use bilinear filtering mode in the render view", CVAR_ARCHIVE);
 
@@ -232,7 +232,7 @@ void wxSFMLCanvas::OnUpdate()
 		if(theFrame->GetAnimator().GetCurrentState() != nullptr)
 		{
 			if(!isCapturing)
-				Locator::GetActionManager()->Insert(CMDTYPE_FRAMES, FormatString("Drag offset for %s, frame %d", theFrame->GetAnimator().GetCurrentState()->name, theFrame->GetAnimator().GetCurrentState()->GetOffset() + 1));
+				Services::GetActionManager()->Insert(CMDTYPE_FRAMES, FormatString("Drag offset for %s, frame %d", theFrame->GetAnimator().GetCurrentState()->name, theFrame->GetAnimator().GetCurrentState()->GetOffset() + 1));
 			isCapturing = true;
 			sf::Vector2i diff = sf::Vector2i(pos) - lastPos;
 			lastPos = sf::Vector2i(pos);

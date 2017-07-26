@@ -51,7 +51,7 @@ void DanFrame::SaveProject(const wxString &fileName, int toSave, bool forceEmbed
 	// write out the amount of each resource; we can
 	// just store a byte representing what type
 	// of data it is
-	TextureManager *texman = Locator::GetTextureManager();
+	TextureManager *texman = Services::GetTextureManager();
 	if(!texman->texmap.empty() && toSave & SAVEDATA_TEXTURES)
 	{
 		for(auto it = texman->texmap.begin(); it != texman->texmap.end(); ++it)
@@ -99,7 +99,7 @@ void DanFrame::SaveProject(const wxString &fileName, int toSave, bool forceEmbed
 		}
 	}
 
-	SoundManager *sndman = Locator::GetSoundManager();
+	SoundManager *sndman = Services::GetSoundManager();
 	if(!sndman->sndmap.empty() && toSave & SAVEDATA_SOUNDS)
 	{
 		for(auto itz = sndman->sndmap.begin(); itz != sndman->sndmap.end(); ++itz)
@@ -182,31 +182,31 @@ void DanFrame::LoadProject(const wxString &fileName)
 		case DTYPE_TEXTURE:
 			arc >> key;
 			arc >> texture;
-			if(Locator::GetTextureManager()->texmap.find(key) == Locator::GetTextureManager()->texmap.end())
+			if(Services::GetTextureManager()->texmap.find(key) == Services::GetTextureManager()->texmap.end())
 			{
-				Locator::GetTextureManager()->Acquire(texture, "embedded/textureData.file");
-				Locator::GetTextureManager()->Remap(std::string("textureData.file"), std::string(key));
+				Services::GetTextureManager()->Acquire(texture, "embedded/textureData.file");
+				Services::GetTextureManager()->Remap(std::string("textureData.file"), std::string(key));
 				index = SpritesListCtrl->InsertItem(SpritesListCtrl->GetItemCount(), std::string(key));
 				SpritesListCtrl->SetItemData(index, CreateSortData(key, ComputeStringHash(key)));
 				SpritesListCtrl->SetItem(index, COL_SPRITES_SOURCE, "Embedded");
-				width = Locator::GetTextureManager()->GetTexture(key)->getSize().x;
-				height = Locator::GetTextureManager()->GetTexture(key)->getSize().y;
+				width = Services::GetTextureManager()->GetTexture(key)->getSize().x;
+				height = Services::GetTextureManager()->GetTexture(key)->getSize().y;
 				SpritesListCtrl->SetItem(index, COL_SPRITES_SIZE, std::to_string(int(4 * width * height)));
 				SpritesListCtrl->SetItem(index, COL_SPRITES_DIMS, std::to_string(width) + "x" + std::to_string(height));
 			}
 			break;
 		case DTYPE_TEXTUREDIR:
 			arc >> key >> fpath >> fname;
-			if(Locator::GetTextureManager()->texmap.find(key) == Locator::GetTextureManager()->texmap.end())
+			if(Services::GetTextureManager()->texmap.find(key) == Services::GetTextureManager()->texmap.end())
 			{
-				if(Locator::GetTextureManager()->Precache(fpath + fname))
+				if(Services::GetTextureManager()->Precache(fpath + fname))
 				{
-					Locator::GetTextureManager()->Remap(fpath + fname, std::string(key));
+					Services::GetTextureManager()->Remap(fpath + fname, std::string(key));
 					index = SpritesListCtrl->InsertItem(SpritesListCtrl->GetItemCount(), std::string(key));
 					SpritesListCtrl->SetItemData(index, CreateSortData(key, ComputeStringHash(key)));
 					SpritesListCtrl->SetItem(index, COL_SPRITES_SOURCE, fpath + fname);
-					width = Locator::GetTextureManager()->GetTexture(key)->getSize().x;
-					height = Locator::GetTextureManager()->GetTexture(key)->getSize().y;
+					width = Services::GetTextureManager()->GetTexture(key)->getSize().x;
+					height = Services::GetTextureManager()->GetTexture(key)->getSize().y;
 					SpritesListCtrl->SetItem(index, COL_SPRITES_SIZE, std::to_string(int(4 * width * height)));
 					SpritesListCtrl->SetItem(index, COL_SPRITES_DIMS, std::to_string(width) + "x" + std::to_string(height));
 				}
@@ -215,14 +215,14 @@ void DanFrame::LoadProject(const wxString &fileName)
 		case DTYPE_COMPOSITE:
 			arc >> key;
 			composite.Deserialize(arc);
-			if(Locator::GetTextureManager()->compmap.find(key) == Locator::GetTextureManager()->compmap.end())
+			if(Services::GetTextureManager()->compmap.find(key) == Services::GetTextureManager()->compmap.end())
 			{
-				Locator::GetTextureManager()->compmap.insert(std::pair<std::string, std::shared_ptr<CompositeTexture>>(key, std::shared_ptr<CompositeTexture>(new CompositeTexture(composite))));
+				Services::GetTextureManager()->compmap.insert(std::pair<std::string, std::shared_ptr<CompositeTexture>>(key, std::shared_ptr<CompositeTexture>(new CompositeTexture(composite))));
 				index = SpritesListCtrl->InsertItem(SpritesListCtrl->GetItemCount(), std::string(key));
 				SpritesListCtrl->SetItemData(index, CreateSortData(key, ComputeStringHash(key) + 500000));
 				SpritesListCtrl->SetItem(index, COL_SPRITES_SOURCE, "TEXTURES");
-				width = Locator::GetTextureManager()->GetCompositeTexture(key)->m_dims.x;
-				height = Locator::GetTextureManager()->GetCompositeTexture(key)->m_dims.y;
+				width = Services::GetTextureManager()->GetCompositeTexture(key)->m_dims.x;
+				height = Services::GetTextureManager()->GetCompositeTexture(key)->m_dims.y;
 				//SpritesListCtrl->SetItem(index, COL_SPRITES_SIZE, std::to_string(int(4 * width * height)));
 				SpritesListCtrl->SetItem(index, COL_SPRITES_DIMS, std::to_string(width) + "x" + std::to_string(height));
 			}
@@ -230,28 +230,28 @@ void DanFrame::LoadProject(const wxString &fileName)
 		case DTYPE_SOUND:
 			arc >> key;
 			arc >> sound;
-			if(Locator::GetSoundManager()->sndmap.find(key) == Locator::GetSoundManager()->sndmap.end())
+			if(Services::GetSoundManager()->sndmap.find(key) == Services::GetSoundManager()->sndmap.end())
 			{
-				Locator::GetSoundManager()->Acquire(sound, "embedded/soundData.file");
-				Locator::GetSoundManager()->Remap(std::string("soundData.file"), std::string(key));
+				Services::GetSoundManager()->Acquire(sound, "embedded/soundData.file");
+				Services::GetSoundManager()->Remap(std::string("soundData.file"), std::string(key));
 				index = SoundsListCtrl->InsertItem(SoundsListCtrl->GetItemCount(), std::string(key));
 				SoundsListCtrl->SetItemData(index, CreateSortData(key, ComputeStringHash(key)));
 				SoundsListCtrl->SetItem(index, COL_SOUNDS_SOURCE, "Embedded");
-				sndsz = Locator::GetSoundManager()->GetSound(key)->getSampleCount() * sizeof(sf::Int16);
+				sndsz = Services::GetSoundManager()->GetSound(key)->getSampleCount() * sizeof(sf::Int16);
 				SoundsListCtrl->SetItem(index, COL_SOUNDS_SIZE, std::to_string(sndsz));
 			}
 			break;
 		case DTYPE_SOUNDDIR:
 			arc >> key >> fpath >> fname;
-			if(Locator::GetSoundManager()->sndmap.find(key) == Locator::GetSoundManager()->sndmap.end())
+			if(Services::GetSoundManager()->sndmap.find(key) == Services::GetSoundManager()->sndmap.end())
 			{
-				if(Locator::GetSoundManager()->Precache(fpath + fname))
+				if(Services::GetSoundManager()->Precache(fpath + fname))
 				{
-					Locator::GetSoundManager()->Remap(fpath + fname, std::string(key));
+					Services::GetSoundManager()->Remap(fpath + fname, std::string(key));
 					index = SoundsListCtrl->InsertItem(SoundsListCtrl->GetItemCount(), std::string(key));
 					SoundsListCtrl->SetItemData(index, CreateSortData(key, ComputeStringHash(key)));
 					SoundsListCtrl->SetItem(index, COL_SOUNDS_SOURCE, fpath + fname);
-					sndsz = Locator::GetSoundManager()->GetSound(key)->getSampleCount() * sizeof(sf::Int16);
+					sndsz = Services::GetSoundManager()->GetSound(key)->getSampleCount() * sizeof(sf::Int16);
 					SoundsListCtrl->SetItem(index, COL_SOUNDS_SIZE, std::to_string(sndsz));
 				}
 			}
@@ -279,7 +279,7 @@ void DanFrame::LoadProject(const wxString &fileName)
 	}
 
 	// Final steps: compile composite textures, then ensure sprite pointers are valid
-	for(auto ct = Locator::GetTextureManager()->compmap.begin(); ct != Locator::GetTextureManager()->compmap.end(); ++ct)
+	for(auto ct = Services::GetTextureManager()->compmap.begin(); ct != Services::GetTextureManager()->compmap.end(); ++ct)
 	{
 		ct->second->CreateComposite(true);
 	}

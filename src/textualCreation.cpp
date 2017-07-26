@@ -10,7 +10,7 @@
 #include "resrcman.h"
 #include "texman.h"
 #include "soundman.h"
-#include "locator.h"
+#include "services.h"
 #include "textualPanel.h"
 #include "mainFrame.h"
 

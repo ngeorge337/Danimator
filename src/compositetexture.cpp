@@ -86,14 +86,14 @@ void CompositeTexture::CreateComposite(bool recompile)
 			//doOverlay = false;
 
 			// Update composite dependencies here
-			if(Locator::GetTextureManager()->IsComposite(m_layers[i].spriteName))
+			if(Services::GetTextureManager()->IsComposite(m_layers[i].spriteName))
 			{
 				AddDependency(m_layers[i].spriteName);
-				if(recompile) Locator::GetTextureManager()->GetCompositeTexture(m_layers[i].spriteName)->CreateComposite();	// compile the dependencies too
+				if(recompile) Services::GetTextureManager()->GetCompositeTexture(m_layers[i].spriteName)->CreateComposite();	// compile the dependencies too
 			}
 
 			sf::Sprite drawSprite = sf::Sprite(m_layers[i].spr);
-			drawSprite.setTexture(*Locator::GetTextureManager()->GetTexture(m_layers[i].spriteName), true);
+			drawSprite.setTexture(*Services::GetTextureManager()->GetTexture(m_layers[i].spriteName), true);
 
 
 			sf::Color cr = drawSprite.getColor();
@@ -202,7 +202,7 @@ void CompositeTexture::draw(sf::RenderTarget& target, sf::RenderStates states) c
 		{
 			//doOverlay = false;
 			sf::Sprite drawSprite = sf::Sprite(m_layers[i].spr);
-			drawSprite.setTexture(*Locator::GetTextureManager()->GetTexture(m_layers[i].spriteName), true);
+			drawSprite.setTexture(*Services::GetTextureManager()->GetTexture(m_layers[i].spriteName), true);
 			sf::Color cr = drawSprite.getColor();
 			switch(m_layers[i].renderStyle)
 			{

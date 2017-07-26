@@ -82,7 +82,7 @@
 #include "wx/dnd.h"
 #include "wx/dir.h"
 
-
+#pragma warning(disable: 4099)
 // Magick Setup
 #include "Magick++.h"
 
@@ -138,7 +138,7 @@ struct CompositeLayer_t
 #include "random.h"
 #include "thread.h"
 #include "clamped.h"
-#include "locator.h"
+#include "services.h"
 #include "token.h"
 #include "strmanip.h"
 #include "waiting.h"

@@ -176,7 +176,7 @@ void DanFrame::SetPlayingMode(bool mode, bool fromStart /*= false*/)
 	}
 	else if(!mode)
 	{
-		Audio::StopAllSounds();
+		Services::GetAudioSystem()->StopAllSounds();
 		SetControls(true);
 		playButton->SetBitmap(wxBITMAP_PNG(PlayAnim));
 		playButton->SetToolTip(_T("Play Animation"));
@@ -215,7 +215,7 @@ wxString DanFrame::GetAllTexturesCode()
 {
 	wxString ret = "";	// composite textures already processed (for making sure dependencies were completed)
 	processed.clear();
-	for(auto it = Locator::GetTextureManager()->compmap.begin(); it != Locator::GetTextureManager()->compmap.end(); ++it)
+	for(auto it = Services::GetTextureManager()->compmap.begin(); it != Services::GetTextureManager()->compmap.end(); ++it)
 	{
 		if(it->second->HasAnyDependencies())	// Process immediately if the composite doesn't have any dependencies
 		{
@@ -235,22 +235,22 @@ wxString DanFrame::GetAllTexturesCode()
 wxString DanFrame::ProcessTextureDependency(const std::string &compTex)
 {
 	wxString ret = "";
-	auto deps = Locator::GetTextureManager()->GetCompositeTexture(compTex)->GetDependencies();
+	auto deps = Services::GetTextureManager()->GetCompositeTexture(compTex)->GetDependencies();
 	for(auto itx = deps.begin(); itx != deps.end(); ++itx)
 	{
 		// skip a dependency that was processed earlier
 		if(processed.find(*itx) != processed.end())
 			continue;
-		if(Locator::GetTextureManager()->IsComposite(*itx))
+		if(Services::GetTextureManager()->IsComposite(*itx))
 		{
-			if(Locator::GetTextureManager()->GetCompositeTexture(*itx)->HasAnyDependencies())
+			if(Services::GetTextureManager()->GetCompositeTexture(*itx)->HasAnyDependencies())
 			{
 				ret += ProcessTextureDependency(*itx);
 			}
 			if(processed.find(*itx) == processed.end())
 			{
 				processed.insert(*itx);
-				ret += Locator::GetTextureManager()->GetCompositeTexture(*itx)->GetTextureCode();
+				ret += Services::GetTextureManager()->GetCompositeTexture(*itx)->GetTextureCode();
 				ret += "\n";
 			}
 		}
@@ -517,7 +517,7 @@ void DanFrame::ShowSpriteContextMenu(const wxPoint& pos, int selection)
 	else
 		theFrame->hitIndex = selection;
 
-	if(Locator::GetTextureManager()->IsComposite(theFrame->SpritesListCtrl->GetItemText(theFrame->hitIndex).ToStdString()))
+	if(Services::GetTextureManager()->IsComposite(theFrame->SpritesListCtrl->GetItemText(theFrame->hitIndex).ToStdString()))
 	{
 		wxMenu context;
 		context.Append(ID_CONTEXT_SPRITE_EDIT, _T("Edit..."));
@@ -595,7 +595,7 @@ void DanFrame::OnUndo(wxCommandEvent& event)
 	{
 		if(!playingMode)
 		{
-			Locator::GetActionManager()->Undo();
+			Services::GetActionManager()->Undo();
 		}
 	}
 	else if(editorMode == EDITMODE_TEXTURES)
@@ -610,7 +610,7 @@ void DanFrame::OnRedo(wxCommandEvent& event)
 	{
 		if(!playingMode)
 		{
-			Locator::GetActionManager()->Redo();
+			Services::GetActionManager()->Redo();
 		}
 	}
 	else if(editorMode == EDITMODE_TEXTURES)
@@ -759,13 +759,13 @@ bool SpriteDropTarget::OnDropFiles(wxCoord x, wxCoord y, const wxArrayString& fi
 		if(theFrame->SpritesListCtrl->FindItem(-1, fn) != wxNOT_FOUND)
 			continue;
 
-		if(Locator::GetTextureManager()->Precache(filenames[i].ToStdString()))
+		if(Services::GetTextureManager()->Precache(filenames[i].ToStdString()))
 		{
 			if(!ValidateSpriteFormat(fn))
 				eflag = true;
 
 			wxString finalstr = fn;
-			Locator::GetTextureManager()->Remap(filenames[i].ToStdString(), finalstr.ToStdString());
+			Services::GetTextureManager()->Remap(filenames[i].ToStdString(), finalstr.ToStdString());
 			int testloc = -1;
 			testloc = theFrame->SpritesListCtrl->FindItem(-1, finalstr);
 			if(testloc != -1)
@@ -773,8 +773,8 @@ bool SpriteDropTarget::OnDropFiles(wxCoord x, wxCoord y, const wxArrayString& fi
 			int newloc = theFrame->SpritesListCtrl->InsertItem(theFrame->SpritesListCtrl->GetItemCount(), finalstr);
 			theFrame->SpritesListCtrl->SetItemData(newloc, CreateSortData(finalstr, ComputeStringHash(theFrame->SpritesListCtrl->GetItemText(newloc).ToStdString())));
 			theFrame->SpritesListCtrl->SetItem(newloc, COL_SPRITES_SOURCE, filenames[i]);
-			int width = Locator::GetTextureManager()->GetTexture(finalstr.ToStdString())->getSize().x;
-			int height = Locator::GetTextureManager()->GetTexture(finalstr.ToStdString())->getSize().y;
+			int width = Services::GetTextureManager()->GetTexture(finalstr.ToStdString())->getSize().x;
+			int height = Services::GetTextureManager()->GetTexture(finalstr.ToStdString())->getSize().y;
 			theFrame->SpritesListCtrl->SetItem(newloc, COL_SPRITES_SIZE, std::to_string(int(4 * width * height)));
 			theFrame->SpritesListCtrl->SetItem(newloc, COL_SPRITES_DIMS, std::to_string(width) + "x" + std::to_string(height));
 

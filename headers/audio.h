@@ -2,7 +2,7 @@
 
 enum
 {
-	CHAN_AUTO		= -1,
+	CHAN_AUTO = -1,
 	CHAN_BODY,
 	CHAN_VOICE,
 	CHAN_ATTACK,
@@ -16,30 +16,30 @@ enum
 class Audio
 {
 public:
-	static void Init();
+	void Init();
 
-	static sf::Sound &GetSoundSlot(int slot);
-	static sf::Music &GetMusic();
+	sf::Sound &GetSoundSlot(int slot);
+	sf::Music &GetMusic();
 
-	static void ResetSlots();
+	void StopAllSounds();
+	void StopSound(int slot);
+	void PauseSound(int slot);
+	void PauseAllSounds();
+	void UnpauseAllSounds();
+	void PlaySound(const std::string &sound, int slot = CHAN_AUTO, bool loop = false, float pitch = 1.f);
+	void PlaySoundAt(const std::string &sound, sf::Vector2f pos, int slot = CHAN_AUTO, bool loop = false);
+	void SetSoundVolume(float vol);
 
-	static void StopAllSounds();
-	static void StopSound(int slot);
-	static void PauseSound(int slot);
-	static void PlaySound(const std::string &sound, int slot = CHAN_AUTO, bool loop = false);
-	static void PlaySoundAt(const std::string &sound, sf::Vector2f pos, int slot = CHAN_AUTO, bool loop = false);
-	static void SetSoundVolume(float vol);
-
-	static void SetMusic(const std::string &songFile, bool loop = true);
-	static void PlayMusic();
-	static void PauseMusic();
-	static void StopMusic();
-	static void RestartMusic();
+	void SetMusic(const std::string &songFile, bool loop = true);
+	void PlayMusic();
+	void PauseMusic();
+	void StopMusic();
+	void RestartMusic();
 
 
 private:
-	static float m_defVolume;
-	static sf::Music m_music;
-	static std::vector<sf::Sound> m_channels;
-	static std::string m_musicFile;
+	float m_defVolume;
+	sf::Music m_music;
+	std::vector<sf::Sound> m_channels;
+	std::string m_musicFile;
 };

@@ -162,7 +162,7 @@ int DanFrame::OnHotkey(wxKeyEvent& event)
 			// Undo -> Ctrl-Z
 			else if(keyid == 'Z' && event.GetModifiers() == wxMOD_CONTROL)
 			{
-				Locator::GetActionManager()->Undo();
+				Services::GetActionManager()->Undo();
 				event.Skip();
 				return true;
 			}
@@ -170,7 +170,7 @@ int DanFrame::OnHotkey(wxKeyEvent& event)
 			// Redo -> Ctrl-Y
 			else if(keyid == 'Y' && event.GetModifiers() == wxMOD_CONTROL)
 			{
-				Locator::GetActionManager()->Redo();
+				Services::GetActionManager()->Redo();
 				event.Skip();
 				return true;
 			}
@@ -273,11 +273,11 @@ void DanFrame::OnNewProject(wxCommandEvent& event)
 	currentSpriteCtrl->SetValue("");
 	currentSoundCtrl->SetValue("");
 	animator.ClearStates();
-	Locator::GetTextureManager()->UnloadAll();
-	Locator::GetTextureManager()->CreateEmptyTexture("TNT1A0");
-	Locator::GetActionManager()->Wipe();
-	Audio::ResetSlots();
-	Locator::GetSoundManager()->UnloadAll();
+	Services::GetTextureManager()->UnloadAll();
+	Services::GetTextureManager()->CreateEmptyTexture("TNT1A0");
+	Services::GetActionManager()->Wipe();
+	//Audio::ResetSlots();
+	Services::GetSoundManager()->UnloadAll();
 	SpritesListCtrl->InsertItem(0, wxString("* No Sprite (TNT1A0)"));
 	SpritesListCtrl->SetItemData(0, CreateSortData("\0", -9999));
 	SoundsListCtrl->InsertItem(0, wxString("* No Sound"));
@@ -345,11 +345,11 @@ void DanFrame::OnOpenProject(wxCommandEvent& event)
 		currentSpriteCtrl->SetValue("");
 		currentSoundCtrl->SetValue("");
 		animator.ClearStates();
-		Locator::GetTextureManager()->UnloadAll();
-		Locator::GetTextureManager()->CreateEmptyTexture("TNT1A0");
-		Audio::ResetSlots();
-		Locator::GetSoundManager()->UnloadAll();
-		Locator::GetActionManager()->Wipe();
+		Services::GetTextureManager()->UnloadAll();
+		Services::GetTextureManager()->CreateEmptyTexture("TNT1A0");
+		//Audio::ResetSlots();
+		Services::GetSoundManager()->UnloadAll();
+		Services::GetActionManager()->Wipe();
 		SpritesListCtrl->InsertItem(0, wxString("* No Sprite (TNT1A0)"));
 		SpritesListCtrl->SetItemData(0, CreateSortData("\0", -9999));
 		SoundsListCtrl->InsertItem(0, wxString("* No Sound"));
@@ -450,7 +450,7 @@ void DanFrame::OnSettings(wxCommandEvent& event)
 
 		spritePreviewer->Show(dan_showSpritePreview);
 		spritePanel->Layout();
-		Locator::GetTextureManager()->SetFiltering(r_bilinear);
+		Services::GetTextureManager()->SetFiltering(r_bilinear);
 	}
 	inModal = false;
 }
@@ -487,7 +487,7 @@ void DanFrame::OnExit(wxCommandEvent& event)
 		else if(ret == wxID_CANCEL)
 			return;
 	}
-	Audio::ResetSlots();
+	//Audio::ResetSlots();
 	Close(true);
 }
 
@@ -523,7 +523,7 @@ void DanFrame::OnNewState(wxCommandEvent& event)
 
 		bool selectIt = (animator.m_validStates.empty() || StateListCtrl->GetFirstSelected() == -1 ? true : false);
 
-		Locator::GetActionManager()->Insert(CMDTYPE_FRAMES, FormatString("Create state - %s", st));
+		Services::GetActionManager()->Insert(CMDTYPE_FRAMES, FormatString("Create state - %s", st));
 		animator.CreateState(st)->AddEmptyFrame();
 		StateListCtrl->DanPushBack(wxString(st));
 
@@ -552,7 +552,7 @@ void DanFrame::OnDeleteState(wxCommandEvent& event)
 	{
 		if(playingMode) SetPlayingMode(false);
 		std::string stateName = StateListCtrl->GetItemText(StateListCtrl->GetFirstSelected()).ToStdString();
-		Locator::GetActionManager()->Insert(CMDTYPE_FRAMES, FormatString("Delete state - %s", stateName));
+		Services::GetActionManager()->Insert(CMDTYPE_FRAMES, FormatString("Delete state - %s", stateName));
 		animator.DeleteState(StateListCtrl->GetItemText(StateListCtrl->GetFirstSelected()).ToStdString());
 		StateListCtrl->DanDeleteItem(StateListCtrl->GetFirstSelected());
 
@@ -625,21 +625,21 @@ void DanFrame::OnAddSprite(wxCommandEvent& event)
 			if(SpritesListCtrl->FindItem(-1, fn) != wxNOT_FOUND)
 				continue;
 			
-			if(Locator::GetTextureManager()->Precache(fileFullPaths[i].ToStdString()))
+			if(Services::GetTextureManager()->Precache(fileFullPaths[i].ToStdString()))
 			{
 				if(!ValidateSpriteFormat(fn))
 					eflag = true;
 
 				wxString finalstr = fn;
-				Locator::GetTextureManager()->Remap(fileFullPaths[i].ToStdString(), finalstr.ToStdString());
+				Services::GetTextureManager()->Remap(fileFullPaths[i].ToStdString(), finalstr.ToStdString());
 				int testloc = -1;
 				if(testloc = SpritesListCtrl->FindItem(-1, finalstr) != -1)
 					SpritesListCtrl->DeleteItem(testloc);
 				int newloc = SpritesListCtrl->InsertItem(SpritesListCtrl->GetItemCount(), finalstr);
 				SpritesListCtrl->SetItemData(newloc, CreateSortData(finalstr, ComputeStringHash(SpritesListCtrl->GetItemText(newloc).ToStdString())));
 				SpritesListCtrl->SetItem(newloc, COL_SPRITES_SOURCE, fileFullPaths[i]);
-				int width = Locator::GetTextureManager()->GetTexture(finalstr.ToStdString())->getSize().x;
-				int height = Locator::GetTextureManager()->GetTexture(finalstr.ToStdString())->getSize().y;
+				int width = Services::GetTextureManager()->GetTexture(finalstr.ToStdString())->getSize().x;
+				int height = Services::GetTextureManager()->GetTexture(finalstr.ToStdString())->getSize().y;
 				SpritesListCtrl->SetItem(newloc, COL_SPRITES_SIZE, std::to_string(int(4 * width * height)));
 				SpritesListCtrl->SetItem(newloc, COL_SPRITES_DIMS, std::to_string(width) + "x" + std::to_string(height));
 				
@@ -660,7 +660,7 @@ void DanFrame::OnDeleteSprite(wxCommandEvent& event)
 	if(SpritesListCtrl->GetFirstSelected() != wxNOT_FOUND && SpritesListCtrl->GetItemText(SpritesListCtrl->GetFirstSelected()).CmpNoCase(wxString("* No Sprite (TNT1A0)")) != 0 )
 	{
 		if(DanAlert::AlertIf(warn_deletesprite, "Warning: You are about to delete a sprite or custom texture, which cannot be undone.\nClick Ok to continue or Cancel to abort.")) return;
-		Locator::GetTextureManager()->Unload(SpritesListCtrl->GetItemText(SpritesListCtrl->GetFirstSelected()).ToStdString());
+		Services::GetTextureManager()->Unload(SpritesListCtrl->GetItemText(SpritesListCtrl->GetFirstSelected()).ToStdString());
 
 		for(auto it = animator.m_validStates.begin(); it != animator.m_validStates.end(); ++it)
 		{
@@ -669,7 +669,7 @@ void DanFrame::OnDeleteSprite(wxCommandEvent& event)
 				if(it->second.GetFrame(i).spriteName == SpritesListCtrl->GetItemText(SpritesListCtrl->GetFirstSelected()).ToStdString())
 				{
 					it->second.GetFrame(i).spriteName = "TNT1A0";
-					it->second.GetFrame(i).sprite.setTexture(*Locator::GetTextureManager()->GetTexture("TNT1A0"));
+					it->second.GetFrame(i).sprite.setTexture(*Services::GetTextureManager()->GetTexture("TNT1A0"));
 				}
 			}
 		}
@@ -712,16 +712,16 @@ void DanFrame::OnAddSound(wxCommandEvent& event)
 			if(SoundsListCtrl->FindItem(-1, sndAlias) != wxNOT_FOUND)
 				continue;
 
-			if(Locator::GetSoundManager()->Precache(fileFullPaths[i].ToStdString()))
+			if(Services::GetSoundManager()->Precache(fileFullPaths[i].ToStdString()))
 			{
-				Locator::GetSoundManager()->Remap(fileFullPaths[i].ToStdString(), sndAlias.ToStdString());
+				Services::GetSoundManager()->Remap(fileFullPaths[i].ToStdString(), sndAlias.ToStdString());
 				int testloc = -1;
 				if(testloc = SoundsListCtrl->FindItem(-1, sndAlias) != -1)
 					SoundsListCtrl->DeleteItem(testloc);
 				int newloc = SoundsListCtrl->InsertItem(SoundsListCtrl->GetItemCount(), sndAlias);
 				SoundsListCtrl->SetItemData(newloc, CreateSortData(sndAlias, ComputeStringHash(SoundsListCtrl->GetItemText(newloc).ToStdString())));
 				SoundsListCtrl->SetItem(newloc, COL_SOUNDS_SOURCE, fileFullPaths[i].ToStdString());
-				int sndsz = Locator::GetSoundManager()->GetSound(sndAlias.ToStdString())->getSampleCount() * sizeof(sf::Int16);
+				int sndsz = Services::GetSoundManager()->GetSound(sndAlias.ToStdString())->getSampleCount() * sizeof(sf::Int16);
 				SoundsListCtrl->SetItem(newloc, COL_SOUNDS_SIZE, std::to_string(sndsz));
 				
 				saved = false;
@@ -737,7 +737,7 @@ void DanFrame::OnDeleteSound(wxCommandEvent& event)
 	if(SoundsListCtrl->GetFirstSelected() != wxNOT_FOUND && SoundsListCtrl->GetItemText(SoundsListCtrl->GetFirstSelected()) != wxString("* No Sound"))
 	{
 		if(DanAlert::AlertIf(warn_deletesound, "Warning: You are about to delete a sound, which cannot be undone.\nClick Ok to continue or Cancel to abort.")) return;
-		Locator::GetSoundManager()->Unload(SoundsListCtrl->GetItemText(SoundsListCtrl->GetFirstSelected()).ToStdString());
+		Services::GetSoundManager()->Unload(SoundsListCtrl->GetItemText(SoundsListCtrl->GetFirstSelected()).ToStdString());
 
 		for(auto it = animator.m_validStates.begin(); it != animator.m_validStates.end(); ++it)
 		{
@@ -761,7 +761,7 @@ void DanFrame::OnAddFrame(wxCommandEvent& event)
 {
 	if(animator.GetCurrentState() == nullptr)
 		return;
-	Locator::GetActionManager()->Insert(CMDTYPE_FRAMES, FormatString("Add frame to '%s'", animator.GetCurrentState()->name));
+	Services::GetActionManager()->Insert(CMDTYPE_FRAMES, FormatString("Add frame to '%s'", animator.GetCurrentState()->name));
 	animator.GetCurrentState()->AddEmptyFrame();
 	UpdateTimeline();
 	timelineSlider->SetValue(timelineSlider->GetMax());
@@ -777,7 +777,7 @@ void DanFrame::OnDeleteFrame(wxCommandEvent& event)
 {
 	if(animator.GetCurrentState() == nullptr || animator.GetCurrentState()->m_frames.size() <= 1)
 		return;
-	Locator::GetActionManager()->Insert(CMDTYPE_FRAMES, FormatString("Delete frame from '%s'", animator.GetCurrentState()->name));
+	Services::GetActionManager()->Insert(CMDTYPE_FRAMES, FormatString("Delete frame from '%s'", animator.GetCurrentState()->name));
 	animator.GetCurrentState()->RemoveFrame(timelineSlider->GetValue() - 1);
 	UpdateTimeline();
 	ResetFrame();
@@ -810,15 +810,15 @@ void DanFrame::OnSelectSprite(wxListEvent& event)
 {
 	if(animator.GetCurrentState() == nullptr)
 		return;
-	Locator::GetActionManager()->Insert(CMDTYPE_FRAMES, FormatString("Change sprite to '%s'", SpritesListCtrl->GetItemText(SpritesListCtrl->GetFirstSelected()).ToStdString()));
+	Services::GetActionManager()->Insert(CMDTYPE_FRAMES, FormatString("Change sprite to '%s'", SpritesListCtrl->GetItemText(SpritesListCtrl->GetFirstSelected()).ToStdString()));
 	if(!SpritesListCtrl->GetItemText(SpritesListCtrl->GetFirstSelected()).CmpNoCase(wxString("* No Sprite (TNT1A0)")))
 	{
-		animator.GetCurrentState()->GetCurrentFrame().sprite.setTexture(*Locator::GetTextureManager()->GetTexture("TNT1A0"), true);
+		animator.GetCurrentState()->GetCurrentFrame().sprite.setTexture(*Services::GetTextureManager()->GetTexture("TNT1A0"), true);
 		animator.GetCurrentState()->GetCurrentFrame().spriteName = "TNT1A0";
 	}
 	else
 	{
-		animator.GetCurrentState()->GetCurrentFrame().sprite.setTexture(*Locator::GetTextureManager()->GetTexture(SpritesListCtrl->GetItemText(SpritesListCtrl->GetFirstSelected()).ToStdString()), true);
+		animator.GetCurrentState()->GetCurrentFrame().sprite.setTexture(*Services::GetTextureManager()->GetTexture(SpritesListCtrl->GetItemText(SpritesListCtrl->GetFirstSelected()).ToStdString()), true);
 		animator.GetCurrentState()->GetCurrentFrame().spriteName = SpritesListCtrl->GetItemText(SpritesListCtrl->GetFirstSelected()).ToStdString();
 	}
 	currentSpriteCtrl->SetValue(animator.GetCurrentState()->GetCurrentFrame().spriteName);
@@ -829,7 +829,7 @@ void DanFrame::OnSelectSound(wxListEvent& event)
 {
 	if(animator.GetCurrentState() == nullptr)
 		return;
-	Locator::GetActionManager()->Insert(CMDTYPE_FRAMES, FormatString("Change sound to '%s'", SoundsListCtrl->GetItemText(SoundsListCtrl->GetFirstSelected()).ToStdString()));
+	Services::GetActionManager()->Insert(CMDTYPE_FRAMES, FormatString("Change sound to '%s'", SoundsListCtrl->GetItemText(SoundsListCtrl->GetFirstSelected()).ToStdString()));
 	if(SoundsListCtrl->GetItemText(SoundsListCtrl->GetFirstSelected()) == wxString("* No Sound"))
 	{
 		animator.GetCurrentState()->GetCurrentFrame().soundName = "";
@@ -859,7 +859,7 @@ void DanFrame::OnXSpinChange(wxSpinEvent& event)
 {
 	if(animator.GetCurrentState() == nullptr)
 		return;
-	Locator::GetActionManager()->Insert(CMDTYPE_FRAMES, FormatString("Changed X offset for %s, frame %d", animator.GetCurrentState()->name, animator.GetCurrentState()->GetOffset() + 1));
+	Services::GetActionManager()->Insert(CMDTYPE_FRAMES, FormatString("Changed X offset for %s, frame %d", animator.GetCurrentState()->name, animator.GetCurrentState()->GetOffset() + 1));
 	animator.GetCurrentState()->GetCurrentFrame().sprite.setPosition(xSpin->GetValue(), animator.GetCurrentState()->GetCurrentFrame().sprite.getPosition().y);
 	saved = false;
 }
@@ -868,7 +868,7 @@ void DanFrame::OnYSpinChange(wxSpinEvent& event)
 {
 	if(animator.GetCurrentState() == nullptr)
 		return;
-	Locator::GetActionManager()->Insert(CMDTYPE_FRAMES, FormatString("Changed Y offset for %s, frame %d", animator.GetCurrentState()->name, animator.GetCurrentState()->GetOffset() + 1));
+	Services::GetActionManager()->Insert(CMDTYPE_FRAMES, FormatString("Changed Y offset for %s, frame %d", animator.GetCurrentState()->name, animator.GetCurrentState()->GetOffset() + 1));
 	animator.GetCurrentState()->GetCurrentFrame().sprite.setPosition(animator.GetCurrentState()->GetCurrentFrame().sprite.getPosition().x, ySpin->GetValue());
 	saved = false;
 }
@@ -955,7 +955,7 @@ void DanFrame::OnClose(wxCloseEvent& event)
 			return;
 		}
 	}
-	Audio::ResetSlots();
+	//Audio::ResetSlots();
 	event.Skip();  // you may also do:  event.Skip();
 }
 
@@ -1022,15 +1022,15 @@ void DanFrame::OnApplySprite(wxCommandEvent &event)
 {
 	if(animator.GetCurrentState() == nullptr || SpritesListCtrl->GetFirstSelected() == -1)
 		return;
-	Locator::GetActionManager()->Insert(CMDTYPE_FRAMES, FormatString("Change sprite to '%s'", SpritesListCtrl->GetItemText(SpritesListCtrl->GetFirstSelected()).ToStdString()));
+	Services::GetActionManager()->Insert(CMDTYPE_FRAMES, FormatString("Change sprite to '%s'", SpritesListCtrl->GetItemText(SpritesListCtrl->GetFirstSelected()).ToStdString()));
 	if(!SpritesListCtrl->GetItemText(SpritesListCtrl->GetFirstSelected()).CmpNoCase(wxString("* No Sprite (TNT1A0)")))
 	{
-		animator.GetCurrentState()->GetCurrentFrame().sprite.setTexture(*Locator::GetTextureManager()->GetTexture("TNT1A0"), true);
+		animator.GetCurrentState()->GetCurrentFrame().sprite.setTexture(*Services::GetTextureManager()->GetTexture("TNT1A0"), true);
 		animator.GetCurrentState()->GetCurrentFrame().spriteName = "TNT1A0";
 	}
 	else
 	{
-		animator.GetCurrentState()->GetCurrentFrame().sprite.setTexture(*Locator::GetTextureManager()->GetTexture(SpritesListCtrl->GetItemText(SpritesListCtrl->GetFirstSelected()).ToStdString()), true);
+		animator.GetCurrentState()->GetCurrentFrame().sprite.setTexture(*Services::GetTextureManager()->GetTexture(SpritesListCtrl->GetItemText(SpritesListCtrl->GetFirstSelected()).ToStdString()), true);
 		animator.GetCurrentState()->GetCurrentFrame().spriteName = SpritesListCtrl->GetItemText(SpritesListCtrl->GetFirstSelected()).ToStdString();
 	}
 	currentSpriteCtrl->SetValue(animator.GetCurrentState()->GetCurrentFrame().spriteName);
@@ -1071,7 +1071,7 @@ void DanFrame::OnCreateTexture(wxCommandEvent &event)
 		SpritesListCtrl->SetItemData(newloc, CreateSortData(texName, hashNum));
 		textualPanel->m_activeData = SpritesListCtrl->GetItemData(newloc);
 		SpritesListCtrl->SortItems(ListStringComparison, 0);
-		textualPanel->m_activeTexture = Locator::GetTextureManager()->GetCompositeTexture(texName.ToStdString());
+		textualPanel->m_activeTexture = Services::GetTextureManager()->GetCompositeTexture(texName.ToStdString());
 		textualPanel->m_activeTexture->m_hash = hashNum;
 		textualPanel->m_activeTexture->m_texname = texName.ToStdString();
 		textualPanel->m_textureName = texName.ToStdString();
@@ -1102,7 +1102,7 @@ void DanFrame::OnStateDuplicate(wxCommandEvent &event)
 			inModal = false;
 			return;
 		}
-		Locator::GetActionManager()->Insert(CMDTYPE_FRAMES, "Duplicate state");
+		Services::GetActionManager()->Insert(CMDTYPE_FRAMES, "Duplicate state");
 		StateListCtrl->DanPushBack(realString);
 		animator.DuplicateState(name, realString);
 	}
@@ -1131,7 +1131,7 @@ void DanFrame::OnStateRename(wxCommandEvent &event)
 			inModal = false;
 			return;
 		}
-		Locator::GetActionManager()->Insert(CMDTYPE_FRAMES, "Rename state");
+		Services::GetActionManager()->Insert(CMDTYPE_FRAMES, "Rename state");
 		StateListCtrl->SetItemText(hitIndex, realString);
 		StateListCtrl->ChangeOwner(name, realString);
 		animator.RenameState(name, realString);
@@ -1162,7 +1162,7 @@ void DanFrame::OnSoundContext(wxListEvent& event)
 
 void DanFrame::OnExportTextures(wxCommandEvent& event)
 {
-	if(Locator::GetTextureManager()->compmap.empty())
+	if(Services::GetTextureManager()->compmap.empty())
 		return;
 	const wxChar *Filters = _T(
 		"Text Files \t(*.txt)|*.txt"
@@ -1183,7 +1183,7 @@ void DanFrame::OnApplySound(wxCommandEvent& event)
 {
 	if(animator.GetCurrentState() == nullptr || SoundsListCtrl->GetFirstSelected() == -1)
 		return;
-	Locator::GetActionManager()->Insert(CMDTYPE_FRAMES, FormatString("Change sound to '%s'", SoundsListCtrl->GetItemText(SoundsListCtrl->GetFirstSelected()).ToStdString()));
+	Services::GetActionManager()->Insert(CMDTYPE_FRAMES, FormatString("Change sound to '%s'", SoundsListCtrl->GetItemText(SoundsListCtrl->GetFirstSelected()).ToStdString()));
 	if(SoundsListCtrl->GetItemText(SoundsListCtrl->GetFirstSelected()) == wxString("* No Sound"))
 	{
 		animator.GetCurrentState()->GetCurrentFrame().soundName = "";
@@ -1202,7 +1202,7 @@ void DanFrame::OnApplySound(wxCommandEvent& event)
 void DanFrame::OnSpriteEdit(wxCommandEvent &event)
 {
 	std::string name = SpritesListCtrl->GetItemText(hitIndex);
-	textualPanel->m_activeTexture = Locator::GetTextureManager()->GetCompositeTexture(name);
+	textualPanel->m_activeTexture = Services::GetTextureManager()->GetCompositeTexture(name);
 	textualPanel->m_textureName = name;
 	textualPanel->m_activeData = SpritesListCtrl->GetItemData(hitIndex);
 	SetEditorMode(EDITMODE_TEXTURES);
@@ -1235,13 +1235,13 @@ void DanFrame::OnSpriteRename(wxCommandEvent &event)
 			inModal = false;
 			return;
 		}
-		Locator::GetTextureManager()->Remap(name, realString);
+		Services::GetTextureManager()->Remap(name, realString);
 		SpritesListCtrl->SetItemText(hitIndex, realString);
 		int hashNum = ComputeStringHash(SpritesListCtrl->GetItemText(hitIndex).ToStdString()) + 500000;
 		SpritesListCtrl->SetItemData(hitIndex, CreateSortData(SpritesListCtrl->GetItemText(hitIndex).ToStdString(), hashNum));
 
-		Locator::GetTextureManager()->GetCompositeTexture(realString)->m_hash = hashNum;
-		Locator::GetTextureManager()->GetCompositeTexture(realString)->m_texname = realString;
+		Services::GetTextureManager()->GetCompositeTexture(realString)->m_hash = hashNum;
+		Services::GetTextureManager()->GetCompositeTexture(realString)->m_texname = realString;
 
 		SpritesListCtrl->SortItems(ListStringComparison, 0);
 
@@ -1277,20 +1277,20 @@ void DanFrame::OnSpriteDuplicate(wxCommandEvent &event)
 			inModal = false;
 			return;
 		}
-		Locator::GetTextureManager()->Duplicate(name, realString);
+		Services::GetTextureManager()->Duplicate(name, realString);
 
 		int newloc = SpritesListCtrl->InsertItem(hitIndex, realString);
 		int hashNum = ComputeStringHash(SpritesListCtrl->GetItemText(newloc).ToStdString()) + 500000;
 		SpritesListCtrl->SetItemData(newloc, CreateSortData(SpritesListCtrl->GetItemText(newloc).ToStdString(), hashNum));
 		SpritesListCtrl->SetItem(newloc, COL_SPRITES_SOURCE, _T("TEXTURES"));
-		int width = Locator::GetTextureManager()->GetTexture(realString)->getSize().x;
-		int height = Locator::GetTextureManager()->GetTexture(realString)->getSize().y;
+		int width = Services::GetTextureManager()->GetTexture(realString)->getSize().x;
+		int height = Services::GetTextureManager()->GetTexture(realString)->getSize().y;
 		//SpritesListCtrl->SetItem(newloc, COL_SPRITES_SIZE, std::to_string(int(4 * width * height)));
 		SpritesListCtrl->SetItem(newloc, COL_SPRITES_DIMS, std::to_string(width) + "x" + std::to_string(height));
 		SpritesListCtrl->SortItems(ListStringComparison, 0);
 
-		Locator::GetTextureManager()->GetCompositeTexture(realString)->m_hash = hashNum;
-		Locator::GetTextureManager()->GetCompositeTexture(realString)->m_texname = realString;
+		Services::GetTextureManager()->GetCompositeTexture(realString)->m_hash = hashNum;
+		Services::GetTextureManager()->GetCompositeTexture(realString)->m_texname = realString;
 
 		//animator.UpdateSpriteNames(name, realString);
 	}
@@ -1299,11 +1299,11 @@ void DanFrame::OnSpriteDuplicate(wxCommandEvent &event)
 
 void DanFrame::OnSpriteViewCode(wxCommandEvent &event)
 {
-	if(SpritesListCtrl->GetFirstSelected() == -1 || !Locator::GetTextureManager()->IsComposite(SpritesListCtrl->GetItemText(SpritesListCtrl->GetFirstSelected()).ToStdString()))
+	if(SpritesListCtrl->GetFirstSelected() == -1 || !Services::GetTextureManager()->IsComposite(SpritesListCtrl->GetItemText(SpritesListCtrl->GetFirstSelected()).ToStdString()))
 		return;
 	if(codeView)
 		codeView->Close();
-	codeView = new DanCode(Locator::GetTextureManager()->GetCompositeTexture(SpritesListCtrl->GetItemText(SpritesListCtrl->GetFirstSelected()).ToStdString())->GetTextureCode(), this, _T("View TEXTURES Code"), wxDefaultPosition, wxSize(300, 450));
+	codeView = new DanCode(Services::GetTextureManager()->GetCompositeTexture(SpritesListCtrl->GetItemText(SpritesListCtrl->GetFirstSelected()).ToStdString())->GetTextureCode(), this, _T("View TEXTURES Code"), wxDefaultPosition, wxSize(300, 450));
 }
 
 void DanFrame::OnSoundRename(wxCommandEvent &event)
@@ -1328,7 +1328,7 @@ void DanFrame::OnSoundRename(wxCommandEvent &event)
 			inModal = false;
 			return;
 		}
-		Locator::GetSoundManager()->Remap(name, realString);
+		Services::GetSoundManager()->Remap(name, realString);
 		SoundsListCtrl->SetItemText(hitIndex, realString);
 
 		animator.UpdateSoundNames(name, realString);
@@ -1341,7 +1341,7 @@ void DanFrame::OnInsertFrame(wxCommandEvent& event)
 {
 	if(animator.GetCurrentState() == nullptr)
 		return;
-	Locator::GetActionManager()->Insert(CMDTYPE_FRAMES, FormatString("Inserted frame to '%s'", animator.GetCurrentState()->name));
+	Services::GetActionManager()->Insert(CMDTYPE_FRAMES, FormatString("Inserted frame to '%s'", animator.GetCurrentState()->name));
 	animator.GetCurrentState()->InsertEmptyFrame();
 	UpdateTimeline();
 	timelineSlider->SetValue(timelineSlider->GetValue() + 1);
@@ -1369,7 +1369,7 @@ void DanFrame::OnBatchAction(wxCommandEvent& event)
 			return;
 		}
 
-		Locator::GetActionManager()->Insert(CMDTYPE_FRAMES, FormatString("Batch action on state '%s'", GetAnimator().GetCurrentState()->name));
+		Services::GetActionManager()->Insert(CMDTYPE_FRAMES, FormatString("Batch action on state '%s'", GetAnimator().GetCurrentState()->name));
 
 		int startFrame = batchdlg->frameStartEntry->GetValue() - 1;
 		int endFrame = batchdlg->frameEndEntry->GetValue();
@@ -1451,7 +1451,7 @@ void DanFrame::OnPasteFrame(wxCommandEvent& event)
 	if(animator.GetCurrentState()->m_frames.empty())
 		return;
 
-	Locator::GetActionManager()->Insert(CMDTYPE_FRAMES, FormatString("Pasted frame to state '%s', frame %d", GetAnimator().GetCurrentState()->name, timelineSlider->GetValue()));
+	Services::GetActionManager()->Insert(CMDTYPE_FRAMES, FormatString("Pasted frame to state '%s', frame %d", GetAnimator().GetCurrentState()->name, timelineSlider->GetValue()));
 	animator.GetCurrentState()->GetCurrentFrame() = m_copiedFrame;
 
 	UpdateTimeline();
@@ -1562,16 +1562,16 @@ void DanFrame::OnImportSndinfo(wxCommandEvent& event)
 
 					if(fileIndex > -1)
 					{
-						if(Locator::GetSoundManager()->Precache(fileList[fileIndex].ToStdString()))
+						if(Services::GetSoundManager()->Precache(fileList[fileIndex].ToStdString()))
 						{
-							Locator::GetSoundManager()->Remap(fileList[fileIndex].ToStdString(), sndAlias);
+							Services::GetSoundManager()->Remap(fileList[fileIndex].ToStdString(), sndAlias);
 							int testloc = -1;
 							if(testloc = SoundsListCtrl->FindItem(-1, sndAlias) != -1)
 								SoundsListCtrl->DeleteItem(testloc);
 							int newloc = SoundsListCtrl->InsertItem(SoundsListCtrl->GetItemCount(), sndAlias);
 							SoundsListCtrl->SetItemData(newloc, CreateSortData(sndAlias, ComputeStringHash(SoundsListCtrl->GetItemText(newloc).ToStdString())));
 							SoundsListCtrl->SetItem(newloc, COL_SOUNDS_SOURCE, fileList[fileIndex].ToStdString());
-							int sndsz = Locator::GetSoundManager()->GetSound(sndAlias)->getSampleCount() * sizeof(sf::Int16);
+							int sndsz = Services::GetSoundManager()->GetSound(sndAlias)->getSampleCount() * sizeof(sf::Int16);
 							SoundsListCtrl->SetItem(newloc, COL_SOUNDS_SIZE, std::to_string(sndsz));
 
 							saved = false;

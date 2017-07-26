@@ -4,7 +4,7 @@
 #include "SFMLControl.h"
 #include "textualPanel.h"
 #include "mainFrame.h"
-#include "locator.h"
+#include "services.h"
 #include "textualView.h"
 
 extern DanFrame *theFrame;

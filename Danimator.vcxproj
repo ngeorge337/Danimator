@@ -13,6 +13,7 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{F0E313B1-5BC9-42ED-8C81-9489DFB77E80}</ProjectGuid>
     <RootNamespace>Danimator</RootNamespace>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -39,23 +40,23 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <LibraryPath>./dependencies/SFML/lib;./dependencies/freetype/lib;./dependencies/zlib;./dependencies/jpeg;./dependencies/sndfile;./dependencies/OpenAL/libs/Win32;./dependencies/glew/lib;./dependencies/wxWidgets/lib/vc_lib;./dependencies/ImageMagick/lib;$(LibraryPath)</LibraryPath>
+    <LibraryPath>./dependencies/SFML/lib;./dependencies/freetype/lib;./dependencies/zlib;./dependencies/jpeg;./dependencies/sndfile;./dependencies/vorbis/lib;./dependencies/ogg/lib;./dependencies/flac/lib;./dependencies/OpenAL/libs/Win32;./dependencies/glew/lib;./dependencies/wxWidgets/lib/vc_lib;./dependencies/ImageMagick/lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <LibraryPath>./dependencies/SFML/lib;./dependencies/freetype/lib;./dependencies/zlib;./dependencies/jpeg;./dependencies/sndfile;./dependencies/OpenAL/libs/Win32;./dependencies/glew/lib;./dependencies/wxWidgets/lib/vc_lib;./dependencies/ImageMagick/lib;$(LibraryPath)</LibraryPath>
+    <LibraryPath>./dependencies/SFML/lib;./dependencies/freetype/lib;./dependencies/zlib;./dependencies/jpeg;./dependencies/sndfile;./dependencies/vorbis/lib;./dependencies/ogg/lib;./dependencies/flac/lib;./dependencies/OpenAL/libs/Win32;./dependencies/glew/lib;./dependencies/wxWidgets/lib/vc_lib;./dependencies/ImageMagick/lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>./src;./headers;./dependencies/freetype/include;./dependencies/dirent/include;./dependencies/SFML/include;./dependencies/OpenAL/include;./dependencies/glm/;./dependencies/glew/include;./dependencies/zlib/include;./dependencies/wxWidgets/include;./dependencies/wxWidgets/include/msvc;./dependencies/wxWidgets/bitmaps;./dependencies/ImageMagick/include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>./src;./headers;./dependencies/freetype/include;./dependencies/dirent/include;./dependencies/SFML/include;./dependencies/OpenAL/include;./dependencies/glm/;./dependencies/glew/include;./dependencies/zlib/include;./dependencies/stb_image/include;./dependencies/ogg/include;./dependencies/vorbis/include;./dependencies/flac/include;./dependencies/wxWidgets/include;./dependencies/wxWidgets/include/msvc;./dependencies/wxWidgets/bitmaps;./dependencies/ImageMagick/include</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>GLEW_STATIC;STATIC_MAGICK;SFML_STATIC;_LIB;_CRT_SECURE_NO_WARNINGS;WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
-      <AdditionalDependencies>winmm.lib;zlibd.lib;sndfile.lib;freetype-d.lib;openal32.lib;opengl32.lib;glew32sd.lib;sfml-main-d.lib;sfml-system-s-d.lib;sfml-window-s-d.lib;sfml-network-s-d.lib;sfml-audio-s-d.lib;sfml-graphics-s-d.lib;CORE_DB_magick_.lib;CORE_DB_Magick++_.lib;CORE_DB_wand_.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>winmm.lib;zlibd.lib;sndfile.lib;ogg.lib;flac.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;freetype.lib;openal32.lib;opengl32.lib;glew32sd.lib;sfml-main-d.lib;sfml-system-s-d.lib;sfml-window-s-d.lib;sfml-network-s-d.lib;sfml-audio-s-d.lib;sfml-graphics-s-d.lib;CORE_DB_magick_.lib;CORE_DB_Magick++_.lib;CORE_DB_wand_.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>
       </IgnoreSpecificDefaultLibraries>
     </Link>
@@ -73,14 +74,14 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>./src;./headers;./dependencies/freetype/include;./dependencies/dirent/include;./dependencies/SFML/include;./dependencies/OpenAL/include;./dependencies/glm/;./dependencies/glew/include;./dependencies/zlib/include;./dependencies/wxWidgets/include;./dependencies/wxWidgets/include/msvc;./dependencies/wxWidgets/bitmaps;./dependencies/ImageMagick/include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>./src;./headers;./dependencies/freetype/include;./dependencies/dirent/include;./dependencies/SFML/include;./dependencies/OpenAL/include;./dependencies/glm/;./dependencies/glew/include;./dependencies/zlib/include;./dependencies/stb_image/include;./dependencies/ogg/include;./dependencies/vorbis/include;./dependencies/flac/include;./dependencies/wxWidgets/include;./dependencies/wxWidgets/include/msvc;./dependencies/wxWidgets/bitmaps;./dependencies/ImageMagick/include</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>GLEW_STATIC;STATIC_MAGICK;SFML_STATIC;_LIB;_CRT_SECURE_NO_WARNINGS;WIN32;_NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>winmm.lib;zlib.lib;sndfile.lib;freetype.lib;openal32.lib;opengl32.lib;glew32s.lib;sfml-main.lib;sfml-system-s.lib;sfml-window-s.lib;sfml-network-s.lib;sfml-audio-s.lib;sfml-graphics-s.lib;CORE_RL_magick_.lib;CORE_RL_Magick++_.lib;CORE_RL_wand_.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>winmm.lib;zlib.lib;sndfile.lib;ogg.lib;flac.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;freetype.lib;openal32.lib;opengl32.lib;glew32s.lib;sfml-main.lib;sfml-system-s.lib;sfml-window-s.lib;sfml-network-s.lib;sfml-audio-s.lib;sfml-graphics-s.lib;CORE_RL_magick_.lib;CORE_RL_Magick++_.lib;CORE_RL_wand_.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Windows</SubSystem>
       <IgnoreSpecificDefaultLibraries>
       </IgnoreSpecificDefaultLibraries>
@@ -112,8 +113,10 @@
     <ClInclude Include="headers\DanStateList.h" />
     <ClInclude Include="headers\externcvar.h" />
     <ClInclude Include="headers\file.h" />
+    <ClInclude Include="headers\fontman.h" />
     <ClInclude Include="headers\libs.h" />
-    <ClInclude Include="headers\locator.h" />
+    <ClInclude Include="headers\RTFText.h" />
+    <ClInclude Include="headers\services.h" />
     <ClInclude Include="headers\main.h" />
     <ClInclude Include="headers\mainFrame.h" />
     <ClInclude Include="headers\mainWindow.h" />
@@ -122,6 +125,7 @@
     <ClInclude Include="headers\resrcman.h" />
     <ClInclude Include="headers\serializer.h" />
     <ClInclude Include="headers\SFMLControl.h" />
+    <ClInclude Include="headers\shaderman.h" />
     <ClInclude Include="headers\soundman.h" />
     <ClInclude Include="headers\SpritePreview.h" />
     <ClInclude Include="headers\static.h" />
@@ -151,7 +155,9 @@
     <ClCompile Include="src\DanList.cpp" />
     <ClCompile Include="src\DanStateList.cpp" />
     <ClCompile Include="src\file.cpp" />
-    <ClCompile Include="src\locator.cpp" />
+    <ClCompile Include="src\fontman.cpp" />
+    <ClCompile Include="src\RTFText.cpp" />
+    <ClCompile Include="src\services.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\mainFrame.cpp" />
     <ClCompile Include="src\mainFrameCreation.cpp" />
@@ -161,6 +167,7 @@
     <ClCompile Include="src\projectfile.cpp" />
     <ClCompile Include="src\projectfileOld.cpp" />
     <ClCompile Include="src\SFMLControl.cpp" />
+    <ClCompile Include="src\shaderman.cpp" />
     <ClCompile Include="src\soundman.cpp" />
     <ClCompile Include="src\SpritePreview.cpp" />
     <ClCompile Include="src\strmanip.cpp" />

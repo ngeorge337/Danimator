@@ -92,9 +92,6 @@
     <ClInclude Include="headers\externcvar.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="headers\locator.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="headers\main.h">
       <Filter>GUI</Filter>
     </ClInclude>
@@ -152,6 +149,18 @@
     <ClInclude Include="headers\serializer.h">
       <Filter>GUI</Filter>
     </ClInclude>
+    <ClInclude Include="headers\services.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="headers\shaderman.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="headers\fontman.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="headers\RTFText.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\animator.cpp">
@@ -191,9 +200,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\cvar.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\locator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\main.cpp">
@@ -261,6 +267,18 @@
     </ClCompile>
     <ClCompile Include="src\projectfileOld.cpp">
       <Filter>GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="src\services.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\shaderman.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\fontman.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RTFText.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

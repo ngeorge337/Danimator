@@ -9,7 +9,7 @@
 #include "resrcman.h"
 #include "texman.h"
 #include "soundman.h"
-#include "locator.h"
+#include "services.h"
 #include "codewindow.h"
 #include "textualPanel.h"
 #include "mainFrame.h"
@@ -309,7 +309,7 @@ void TextualPanel::OnApplyPatch(wxCommandEvent &event)
 		texName = "TNT1A0";
 
 	m_activeTexture->GetLayer(GetActualSelection()).spriteName = texName;
-	m_activeTexture->GetLayer(GetActualSelection()).spr.setTexture(*Locator::GetTextureManager()->GetTexture(texName), true);
+	m_activeTexture->GetLayer(GetActualSelection()).spr.setTexture(*Services::GetTextureManager()->GetTexture(texName), true);
 
 	UpdateLayerInfo();
 	UpdateBlendInfo();
@@ -345,7 +345,7 @@ void TextualPanel::OnSelectPatch(wxListEvent &event)
 		texName = "TNT1A0";
 
 	m_activeTexture->GetLayer(GetActualSelection()).spriteName = texName;
-	m_activeTexture->GetLayer(GetActualSelection()).spr.setTexture(*Locator::GetTextureManager()->GetTexture(texName), true);
+	m_activeTexture->GetLayer(GetActualSelection()).spr.setTexture(*Services::GetTextureManager()->GetTexture(texName), true);
 
 	UpdateLayerInfo();
 	UpdateBlendInfo();

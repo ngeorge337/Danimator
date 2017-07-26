@@ -143,7 +143,7 @@ void wxImagePanel::OnSize(wxSizeEvent& event){
 
 void wxImagePanel::SetImageFromTexture(const std::string &texName)
 {
-	std::shared_ptr<sf::Texture> tex = Locator::GetTextureManager()->GetTexture(texName);
+	std::shared_ptr<sf::Texture> tex = Services::GetTextureManager()->GetTexture(texName);
 	sf::Image img = tex->copyToImage();
 	const sf::Uint8 *texpixels = img.getPixelsPtr();
 

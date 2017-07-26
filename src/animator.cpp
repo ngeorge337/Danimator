@@ -12,7 +12,7 @@
 #include "configfile.h"
 #include "resrcman.h"
 #include "texman.h"
-#include "locator.h"
+#include "services.h"
 #include "audio.h"
 #include "animator.h"
 #include "textualPanel.h"
@@ -33,7 +33,7 @@ bool FState_t::Tick( float t )
 		if(m_frames[frameOffset].hasSound && !m_frames[frameOffset].soundName.empty())
 		{
 			if(theFrame->allowSoundCheckBox->GetValue() == true)
-				Audio::PlaySound(m_frames[frameOffset].soundName, CHAN_AUTO, false);
+				Services::GetAudioSystem()->PlaySound(m_frames[frameOffset].soundName, CHAN_AUTO, false);
 		}
 	}
 	
@@ -45,7 +45,7 @@ bool FState_t::Tick( float t )
 		frameOffset++;
 		if(frameOffset >= m_frames.size()) // Reached the end of the animation frames
 		{
-			Audio::StopAllSounds();
+			Services::GetAudioSystem()->StopAllSounds();
 			frameOffset = 0;
 			m_ticks = 0;
 			return true;
@@ -53,7 +53,7 @@ bool FState_t::Tick( float t )
 		else
 		{
 			if(!m_frames[frameOffset].soundName.empty() && m_frames[frameOffset].hasSound)
-				Audio::PlaySound(m_frames[frameOffset].soundName, CHAN_AUTO, false);
+				Services::GetAudioSystem()->PlaySound(m_frames[frameOffset].soundName, CHAN_AUTO, false);
 		}
 	}
 	return false;
@@ -388,7 +388,7 @@ void Animator::EnsureSpritePointers()
 	{
 		for(int i = 0; i < it->second.m_frames.size(); i++)
 		{
-			it->second.m_frames[i].sprite.setTexture(*Locator::GetTextureManager()->GetTexture(it->second.m_frames[i].spriteName), true);
+			it->second.m_frames[i].sprite.setTexture(*Services::GetTextureManager()->GetTexture(it->second.m_frames[i].spriteName), true);
 		}
 	}
 }
@@ -433,7 +433,7 @@ void Animator::UpdateSpriteNames(const std::string &oldname, const std::string &
 	{
 		for(int i = 0; i < it->second.m_frames.size(); i++)
 		{
-			it->second.m_frames[i].sprite.setTexture(*Locator::GetTextureManager()->GetTexture(newname), true);
+			it->second.m_frames[i].sprite.setTexture(*Services::GetTextureManager()->GetTexture(newname), true);
 			it->second.m_frames[i].spriteName = newname;
 		}
 	}
@@ -454,6 +454,6 @@ void Animator::UpdateSoundNames(const std::string &oldname, const std::string &n
 
 Frame_t::Frame_t() : duration(1.f), tics(1), sprite(sf::Sprite()), spriteName("TNT1A0"), soundName(""), hasSound(false)
 {
-	sprite.setTexture(*Locator::GetTextureManager()->GetTexture("TNT1A0"), true);
+	sprite.setTexture(*Services::GetTextureManager()->GetTexture("TNT1A0"), true);
 	duration = TICS(1);
 }

@@ -9,7 +9,7 @@
 #include "resrcman.h"
 #include "texman.h"
 #include "soundman.h"
-#include "locator.h"
+#include "services.h"
 #include "codewindow.h"
 #include "textualPanel.h"
 #include "mainFrame.h"
@@ -46,7 +46,7 @@ void TextualPanel::ConstructSpriteListItems()
 	SpritesListCtrl->DeleteAllItems();
 	SpritesListCtrl->InsertItem(0, wxString("* No Sprite (TNT1A0)"));
 	SpritesListCtrl->SetItemData(0, CreateSortData("\0", -9999));
-	TextureManager *tm = Locator::GetTextureManager();
+	TextureManager *tm = Services::GetTextureManager();
 	for(auto it = tm->texmap.begin(); it != tm->texmap.end(); ++it)
 	{
 		if(it->first == "TNT1A0")

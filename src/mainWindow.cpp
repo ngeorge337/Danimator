@@ -12,8 +12,8 @@ bool DanApp::OnInit()
 	Magick::InitializeMagick("");
 	wxImage::AddHandler(new wxPNGHandler);
 	ThreadPool::Init();
-	Locator::Init();
-	Audio::Init();
+	Services::Init();
+	Services::GetAudioSystem()->Init();
 	Camera::Init(sf::FloatRect(0, 0, 320, 240));
 
 	cfg = new ConfigFile("config.cfg", FM_READ);

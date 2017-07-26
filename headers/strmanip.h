@@ -26,12 +26,7 @@ bool HasDirectory(std::string &str);
 std::string FormatString(std::string pmsg, ...);
 std::string FormatString(std::string pmsg, va_list vlz);
 
-// blah blah using the wrong names for class functions
-// I'd like to see you not get annoyed with typing out
-// StringManipulator every time you seek to use it >:(
-
-// Therefore -- Scanner: reads and manipulates string data
-// in various ways
+// Scanner: reads and manipulates string data in various ways
 class Scanner
 {
 public:

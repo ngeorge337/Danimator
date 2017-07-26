@@ -10,19 +10,20 @@
 #include "strmanip.h"
 #include "resrcman.h"
 #include "soundman.h"
+#include "services.h"
 #include "audio.h"
 
 void SoundManager::UnloadAll()
 {
-	Audio::StopAllSounds();
-	Audio::ResetSlots();
+	Services::GetAudioSystem()->StopAllSounds();
+	//Services::GetAudioSystem()->ResetSlots();
 	sndmap.clear();
 }
 
 void SoundManager::ReloadAll()
 {
-	Audio::StopAllSounds();
-	Audio::ResetSlots();
+	Services::GetAudioSystem()->StopAllSounds();
+	//Services::GetAudioSystem()->ResetSlots();
 	for(auto it = sndmap.begin(); it != sndmap.end(); ++it)
 	{
 		Reload(it->first);
@@ -31,13 +32,13 @@ void SoundManager::ReloadAll()
 
 void SoundManager::Unload( std::string fileName )
 {
-	Audio::ResetSlots();
+	//Services::GetAudioSystem()->ResetSlots();
 	sndmap.erase(fileName);
 }
 
 void SoundManager::Reload( std::string fileName )
 {
-	Audio::ResetSlots();
+	//Services::GetAudioSystem()->ResetSlots();
 	Unload(fileName);
 	Precache(fileName);
 }

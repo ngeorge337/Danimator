@@ -28,8 +28,8 @@ void DanFrame::SaveProjectLegacy(const wxString &fileName)
 	bool flag = false;
 	int imgW = 0;
 	int imgH = 0;
-	TextureManager *tm = Locator::GetTextureManager();
-	SoundManager *sm = Locator::GetSoundManager();
+	TextureManager *tm = Services::GetTextureManager();
+	SoundManager *sm = Services::GetSoundManager();
 
 	// Embedding flags
 	if(embSpr && tm->texmap.size() > 0)
@@ -322,20 +322,20 @@ void DanFrame::LoadProjectLegacy(const wxString &fileName)
 			sf::Image image = sf::Image();
 			image.create(imageWidth, imageHeight, textureData);
 			texture.loadFromImage(image);
-			Locator::GetTextureManager()->Acquire(texture, texFile);
-			Locator::GetTextureManager()->Remap(std::string(StripStringDirectory(texFile)), std::string(texKey));
+			Services::GetTextureManager()->Acquire(texture, texFile);
+			Services::GetTextureManager()->Remap(std::string(StripStringDirectory(texFile)), std::string(texKey));
 		}
 		else
 		{
 			texture.loadFromFile(texFile);
-			Locator::GetTextureManager()->Precache(texFile);
-			Locator::GetTextureManager()->Remap(std::string(texFile), std::string(texKey));
+			Services::GetTextureManager()->Precache(texFile);
+			Services::GetTextureManager()->Remap(std::string(texFile), std::string(texKey));
 		}
 		index = SpritesListCtrl->InsertItem(SpritesListCtrl->GetItemCount(), std::string(texKey));
 		SpritesListCtrl->SetItemData(index, CreateSortData(texKey, ComputeStringHash(SpritesListCtrl->GetItemText(index).ToStdString())));
 		SpritesListCtrl->SetItem(index, COL_SPRITES_SOURCE, hasTextureEmbed ? "Embedded" : texFile);
-		int width = Locator::GetTextureManager()->GetTexture(texKey)->getSize().x;
-		int height = Locator::GetTextureManager()->GetTexture(texKey)->getSize().y;
+		int width = Services::GetTextureManager()->GetTexture(texKey)->getSize().x;
+		int height = Services::GetTextureManager()->GetTexture(texKey)->getSize().y;
 		SpritesListCtrl->SetItem(index, COL_SPRITES_SIZE, std::to_string(int(4 * width * height)));
 		SpritesListCtrl->SetItem(index, COL_SPRITES_DIMS, std::to_string(width) + "x" + std::to_string(height));
 
@@ -400,19 +400,19 @@ void DanFrame::LoadProjectLegacy(const wxString &fileName)
 			//soundData[sndDataLen] = '\0';
 			inFile.Read(soundData, sndDataLen);
 			sound.loadFromSamples(soundData, sndSampleCount, sndChannelCount, sndSampleRate);
-			Locator::GetSoundManager()->Acquire(sound, sndFile);
-			Locator::GetSoundManager()->Remap(std::string(StripStringDirectory(sndFile)), std::string(sndKey));
+			Services::GetSoundManager()->Acquire(sound, sndFile);
+			Services::GetSoundManager()->Remap(std::string(StripStringDirectory(sndFile)), std::string(sndKey));
 		}
 		else
 		{
 			sound.loadFromFile(sndFile);
-			Locator::GetSoundManager()->Precache(sndFile);
-			Locator::GetSoundManager()->Remap(std::string(sndFile), std::string(sndKey));
+			Services::GetSoundManager()->Precache(sndFile);
+			Services::GetSoundManager()->Remap(std::string(sndFile), std::string(sndKey));
 		}
 		index = SoundsListCtrl->InsertItem(SoundsListCtrl->GetItemCount(), std::string(sndKey));
 		SoundsListCtrl->SetItemData(index, CreateSortData(sndKey, ComputeStringHash(SoundsListCtrl->GetItemText(index).ToStdString())));
 		SoundsListCtrl->SetItem(index, COL_SOUNDS_SOURCE, hasSoundEmbed ? "Embedded" : sndFile);
-		int sndsz = Locator::GetSoundManager()->GetSound(sndKey)->getSampleCount() * sizeof(sf::Int16);
+		int sndsz = Services::GetSoundManager()->GetSound(sndKey)->getSampleCount() * sizeof(sf::Int16);
 		SoundsListCtrl->SetItem(index, COL_SOUNDS_SIZE, std::to_string(sndsz));
 
 		if(sndKey)			delete[] sndKey;
@@ -482,7 +482,7 @@ void DanFrame::LoadProjectLegacy(const wxString &fileName)
 		}
 
 		//sf::Sprite spr = sf::Sprite();
-		//spr.setTexture(*Locator::GetTextureManager()->GetTexture(spriteName), true);
+		//spr.setTexture(*Services::GetTextureManager()->GetTexture(spriteName), true);
 		//spr.setPosition(frameX, frameY);
 		if(!animator.IsValidState(stateLabel))
 		{
@@ -492,7 +492,7 @@ void DanFrame::LoadProjectLegacy(const wxString &fileName)
 		animator.GetState(stateLabel)->ending = flowControl;
 		if(flowControl == END_GOTO)
 			animator.GetState(stateLabel)->gotoLabel = flowLabel;
-		animator.GetState(stateLabel)->AddFrame(Locator::GetTextureManager()->GetTexture(spriteName), frameDuration);
+		animator.GetState(stateLabel)->AddFrame(Services::GetTextureManager()->GetTexture(spriteName), frameDuration);
 		animator.GetState(stateLabel)->m_frames.back().sprite.setPosition(frameX, frameY);
 		animator.GetState(stateLabel)->m_frames.back().duration = frameDuration;
 		animator.GetState(stateLabel)->m_frames.back().tics = frameTics;

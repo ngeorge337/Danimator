@@ -25,6 +25,7 @@ Thumbs.db
 *.tlog
 *.opendb
 *.sdf
+*.VC.db
 Debug/
 Release/
 Samples/
