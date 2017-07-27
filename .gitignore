@@ -26,11 +26,11 @@ Thumbs.db
 *.opendb
 *.sdf
 *.VC.db
-Debug/
-Release/
-Samples/
-bin/
-dependencies/
-Documentation/
+Debug/*
+Release/*
+Samples/*
+bin/*
+dependencies/*
+Documentation/*
 *.zip
 !dependencies.zip

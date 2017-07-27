@@ -27,6 +27,9 @@
     <Filter Include="Controls">
       <UniqueIdentifier>{62823b32-ef0d-444c-950d-062d849f12ca}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Framework">
+      <UniqueIdentifier>{ad341b68-5901-48c1-85d5-b9d292363df2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="headers\libs.h">
