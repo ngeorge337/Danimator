@@ -15,8 +15,8 @@ Setting Up
 =================
 
 1. Download the repo
-2. Extract the included dependencies.zip file into the top-level directory
-(next to the solution file, /icons, /headers, etc.)
+2. Extract the dependencies folder which can be downloaded [from here](http://codingbuff.the-powerhouse.net/files/priv/DanimatorFiles/danimator_dependencies.zip)
+file into the top-level directory (next to the solution file, /icons, /headers, etc.)
 3. Open the solution with Visual Studio 2015
 4. The project should build/compile without errors (in Release mode, compilation
 might take some time because of Imagemagick. I plan to work on reducing the
